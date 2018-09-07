@@ -10,4 +10,4 @@
 /build
 
 # Sensible content
-/auth.json
+/src/constants/auth.json
