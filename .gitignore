@@ -10,4 +10,4 @@
 /build
 
 # Sensible content
-/token.js
+/auth.json
