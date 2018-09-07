@@ -5,9 +5,11 @@
   "main": "index.js",
   "author": "Arnaud Gathy",
   "scripts": {
-    "start": "nodemon src/index.js --exec babel-node src/index.js",
+    "dev": "nodemon src/index.js --exec babel-node src/index.js",
     "prebuild": "rm -r build || true",
-    "build": "babel src --copy-files --out-dir build"
+    "build": "babel src --copy-files --out-dir build",
+    "prestart": "npm run build",
+    "start": "pm2 kill && pm2 start build/index.js"
   },
   "dependencies": {
     "discord.js": "^11.4.2",
