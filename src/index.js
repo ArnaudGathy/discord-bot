@@ -1,23 +1,15 @@
 import Discord from 'discord.js'
-import winston from 'winston'
-import {auth} from './auth/auth'
 import { messageHandler } from './events/message';
+import {token} from '../token'
 
-// Configure logger settings
-const logger = winston.createLogger({
-  level: 'info',
-  transports: [
-    new winston.transports.Console()
-  ]
-})
 
 // Setup discord client
 export const client = new Discord.Client()
-auth.login()
+client.login(token)
 
 client.on('ready', () => {
-  logger.info('Connected')
-  logger.info(`Logged in as ${client.user.tag}`)
+  console.log('Connected')
+  console.log(`Logged in as ${client.user.tag}`)
 });
 
 client.on('message', messageHandler)
