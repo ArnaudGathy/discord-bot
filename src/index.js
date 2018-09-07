@@ -1,6 +1,6 @@
 import Discord from 'discord.js'
 import { messageHandler } from './events/message';
-import auth from '../auth'
+import auth from './constants/auth'
 
 
 // Setup discord client
