@@ -9,7 +9,7 @@ export const commands = {
   },
   ping: {
     action: ({msg}) => msg.channel.send('pong'),
-    info: "Test le présence du bot avec un ping -> pong",
+    info: "Test la présence du bot avec un ping -> pong",
   },
   info: {
     action: ({msg}) => msg.channel.send(infoMessage, {code: 'markdown'}),

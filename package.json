@@ -8,8 +8,8 @@
     "dev": "nodemon src/index.js --exec babel-node src/index.js",
     "prebuild": "rm -r build || true",
     "build": "babel src --copy-files --out-dir build",
-    "prestart": "npm run build",
-    "start": "pm2 kill && pm2 start build/index.js"
+    "prestart": "npm install && npm run build",
+    "start": "pm2 stop discord-bot && pm2 start build/index.js --name \"discord-bot\""
   },
   "dependencies": {
     "discord.js": "^11.4.2",
