@@ -1,17 +1,30 @@
 import info from '../../package.json'
 
-const infoMessage = `Name: ${info.name}\nDescription: ${info.description}\nVersion : ${info.version}\nAuthor: ${info.author}`
+const infoMessage = `Nom: ${info.name}\nDescription: ${info.description}\nVersion : ${info.version}\Auteur: ${info.author}`
 
 export const commands = {
-  help: ({msg}) => msg.channel.send(commandList, {code: 'markdown'}),
-  ping: ({msg}) => msg.channel.send('pong'),
-  info: ({msg}) => msg.channel.send(infoMessage, {code: 'markdown'}),
-  hello: ({msg}) => msg.channel.send(`Kikoo ${msg.author} ( ͡° ͜ʖ ͡°)`),
+  help: {
+    action: ({msg}) => msg.channel.send(commandList, {code: 'markdown'}),
+    info: "Affiche la liste des commandes",
+  },
+  ping: {
+    action: ({msg}) => msg.channel.send('pong'),
+    info: "Test le présence du bot avec un ping -> pong",
+  },
+  info: {
+    action: ({msg}) => msg.channel.send(infoMessage, {code: 'markdown'}),
+    info: "Informations sur le bot",
+  },
+  hello: {
+    action: ({msg}) => msg.channel.send(`Kikoo ${msg.author} ( ͡° ͜ʖ ͡°)`),
+    info: "Dites bonjour au bot !",
+  },
 }
 
-const commandList = `# Available commands\n${Object.keys(commands).map(key => `* ${key}`).join("\n")}`
+const commandList = `# Commandes disponibles\n${Object.entries(commands).map(([key, value]) => `* !${key} - ${value.info}`).join("\n")}`
 
-export const fallback = async ({msg, content}) => {
+export const fallback = async ({msg, command}) => {
   const channel = await msg.author.createDM()
-  channel.send(`Pas de commande associée à **${content}**`)
+  const sadGif = "https://giphy.com/gifs/walk-away-sad-6bWNHVAoj7tNS"
+  channel.send(`Pas de commande associée à **${command}**\n${sadGif}`)
 }

@@ -9,6 +9,6 @@ export const messageHandler = (msg) => {
     const params = {}
 
     console.log(params)
-    return commands[command] ? commands[command]({msg, params}) : fallback({msg, command})
+    return commands[command] ? commands[command].action({msg, params}) : fallback({msg, command})
   }
 }
