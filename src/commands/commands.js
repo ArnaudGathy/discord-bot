@@ -1,5 +1,5 @@
 import info from '../../package.json'
-import {test} from '../index'
+import {type} from "os";
 
 export const commands = {
   help: {
@@ -23,7 +23,7 @@ export const commands = {
           info.version
         }\nAuteur: ${info.author}\nGithub: ${
           info.homepage
-        }\nRunning in ${process.env.NODE_ENV} environment`,
+        }\nRunning in ${process.env.NODE_ENV} environment on ${type()}`,
         {code: 'markdown'}
       ),
     info: 'Informations sur le bot',
