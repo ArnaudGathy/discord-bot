@@ -10,10 +10,12 @@ client.login(auth.token.discord)
 
 client.on('ready', () => {
   if(process.env.NODE_ENV === 'production') {
-    client.channels.get(channels['test_bot']).send(`Running in ${process.env.NODE_ENV}`)
+    client.channels.get(channels['test_bot']).send(`Running in ${process.env.NODE_ENV} 👌🔥`)
+    client.channels.get(channels['test_bot']).send(`Keys ${Object.keys(process.env)}`)
   } else {
     console.log('Connected')
     console.log(`Logged in as ${client.user.tag}`)
+    
   }
 });
 
