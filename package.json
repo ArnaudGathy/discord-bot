@@ -16,7 +16,8 @@
   "dependencies": {
     "discord.js": "^11.4.2",
     "weasel.js": "^1.0.0",
-    "axios": "0.18.0"
+    "axios": "0.18.0",
+    "dotenv": "6.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

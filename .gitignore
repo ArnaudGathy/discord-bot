@@ -8,3 +8,7 @@
 
 # Sensible content
 /src/constants/auth.json
+
+#.env variables
+.env
+.env.local
