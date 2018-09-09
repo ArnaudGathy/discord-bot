@@ -1,9 +1,8 @@
+require('dotenv').config()
 import Discord from 'discord.js'
 import { messageHandler } from './events/message';
 import auth from './constants/auth'
 import { channels } from './constants/channels';
-
-require('dotenv').config()
 
 export const client = new Discord.Client()
 client.login(auth.token.discord)

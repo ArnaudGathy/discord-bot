@@ -1,14 +1,15 @@
 import info from '../../package.json'
-
-const infoMessage = `Nom: ${info.name}\nDescription: ${
-  info.description
-}\nVersion : ${info.version}\nAuteur: ${info.author}\nGithub: ${
-  info.homepage
-}\nRunning in : ${process.env.NODE_ENV}`
+import {test} from '../index'
 
 export const commands = {
   help: {
-    action: ({msg}) => msg.channel.send(commandList, {code: 'markdown'}),
+    action: ({msg}) =>
+      msg.channel.send(
+        `# Commandes disponibles\n${Object.entries(commands)
+          .map(([key, value]) => `* !${key} - ${value.info}`)
+          .join('\n')}`,
+        {code: 'markdown'}
+      ),
     info: 'Affiche la liste des commandes',
   },
   ping: {
@@ -16,7 +17,15 @@ export const commands = {
     info: 'Test la présence du bot avec un ping -> pong',
   },
   info: {
-    action: ({msg}) => msg.channel.send(infoMessage, {code: 'markdown'}),
+    action: ({msg}) =>
+      msg.channel.send(
+        `Nom: ${info.name}\nDescription: ${info.description}\nVersion : ${
+          info.version
+        }\nAuteur: ${info.author}\nGithub: ${
+          info.homepage
+        }\nRunning in : ${process.env.NODE_ENV}`,
+        {code: 'markdown'}
+      ),
     info: 'Informations sur le bot',
   },
   hello: {
@@ -24,10 +33,6 @@ export const commands = {
     info: 'Dites bonjour au bot !',
   },
 }
-
-const commandList = `# Commandes disponibles\n${Object.entries(commands)
-  .map(([key, value]) => `* !${key} - ${value.info}`)
-  .join('\n')}`
 
 export const fallback = async ({msg, command}) => {
   const channel = await msg.author.createDM()
