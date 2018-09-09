@@ -1,6 +1,6 @@
 import info from '../../package.json'
 
-const infoMessage = `Nom: ${info.name}\nDescription: ${info.description}\nVersion : ${info.version}\nAuteur: ${info.author}\nGithub: ${info.homepage}`
+const infoMessage = `Nom: ${info.name}\nDescription: ${info.description}\nVersion : ${info.version}\nAuteur: ${info.author}\nGithub: ${info.homepage}\nRunning in : ${process.env.NODE_ENV || 'development'}`
 
 export const commands = {
   help: {
