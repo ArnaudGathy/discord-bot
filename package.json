@@ -9,7 +9,8 @@
     "prebuild": "rm -r build || true",
     "build": "babel src --copy-files --out-dir build",
     "prestart": "npm install && npm run build",
-    "start": "pm2 stop discord-bot && pm2 start build/index.js --name \"discord-bot\""
+    "start": "pm2 stop discord-bot && pm2 start build/index.js --name \"discord-bot\"",
+    "pm2:setup": "pm2 start build/index.js --name \"discord-bot\" && pm2 stop discord-bot"
   },
   "dependencies": {
     "discord.js": "^11.4.2",
