@@ -2,8 +2,8 @@
   "name": "arno-bot",
   "version": "1.0.0",
   "description": "Random Discord bot",
-  "main": "index.js",
   "author": "Arnaud Gathy",
+  "license": "MIT",
   "scripts": {
     "dev": "nodemon src/index.js --exec babel-node src/index.js",
     "prebuild": "rm -r build || true",
