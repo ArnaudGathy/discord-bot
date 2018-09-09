@@ -1,5 +1,6 @@
 import info from '../../package.json'
 import {type} from "os";
+import { getRandomGif } from '../utils/giphy';
 
 export const commands = {
   help: {
@@ -35,7 +36,7 @@ export const commands = {
 }
 
 export const fallback = async ({msg, command}) => {
+  const gif = await getRandomGif('cry')
   const channel = await msg.author.createDM()
-  const sadGif = 'https://giphy.com/gifs/walk-away-sad-6bWNHVAoj7tNS'
-  channel.send(`Pas de commande associée à **${command}**\n${sadGif}`)
+  channel.send(`Pas de commande associée à **${command}**\n${gif}`)
 }

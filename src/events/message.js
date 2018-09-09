@@ -8,7 +8,6 @@ export const messageHandler = (msg) => {
     const command = split[0]
     const params = {}
 
-    console.log(params)
     return commands[command] ? commands[command].action({msg, params}) : fallback({msg, command})
   }
 }
