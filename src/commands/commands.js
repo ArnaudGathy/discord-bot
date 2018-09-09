@@ -8,7 +8,7 @@ export const commands = {
     info: "Affiche la liste des commandes",
   },
   ping: {
-    action: ({msg}) => msg.channel.send('pong'),
+    action: ({msg}) => msg.channel.send('pong MOFO !'),
     info: "Test la présence du bot avec un ping -> pong",
   },
   info: {
