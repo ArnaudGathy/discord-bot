@@ -23,7 +23,7 @@ export const commands = {
           info.version
         }\nAuteur: ${info.author}\nGithub: ${
           info.homepage
-        }\nRunning in : ${process.env.NODE_ENV}`,
+        }\nRunning in ${process.env.NODE_ENV} environment`,
         {code: 'markdown'}
       ),
     info: 'Informations sur le bot',
