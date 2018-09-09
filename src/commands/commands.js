@@ -1,6 +1,6 @@
 import info from '../../package.json'
 
-const infoMessage = `Nom: ${info.name}\nDescription: ${info.description}\nVersion : ${info.version}\nAuteur: ${info.author}`
+const infoMessage = `Nom: ${info.name}\nDescription: ${info.description}\nVersion : ${info.version}\nAuteur: ${info.author}\nGithub: ${info.homepage}`
 
 export const commands = {
   help: {
@@ -8,7 +8,7 @@ export const commands = {
     info: "Affiche la liste des commandes",
   },
   ping: {
-    action: ({msg}) => msg.channel.send('pong MOFO !'),
+    action: ({msg}) => msg.channel.send('pong'),
     info: "Test la présence du bot avec un ping -> pong",
   },
   info: {
