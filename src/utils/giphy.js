@@ -15,7 +15,10 @@ const getUrl = (endpoint) => `https://${HOST}/${endpoint.path}?${KEY}`
 
 export const getRandomGif = async (filter) => {
   const endpoint = endpoints.RANDOM
-  const url = `${getUrl(endpoint)}&tag=${filter}`
+  let url = getUrl(endpoint)
+  if(filter) {
+    url = `${url}&tag=${filter}`
+  }
 
   const {data: {data: {embed_url: gif}}} = await axios[endpoint.action](url)
   return gif

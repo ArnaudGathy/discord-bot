@@ -33,6 +33,10 @@ export const commands = {
     action: ({msg}) => msg.channel.send(`Kikoo ${msg.author} ( ͡° ͜ʖ ͡°)`),
     info: 'Dites bonjour au bot !',
   },
+  gif: {
+    action: async ({msg, params}) => msg.channel.send(await getRandomGif(params)),
+    info: 'Renvoie un gif random associé au mot clé unique fourni (!gif cry)'
+  }
 }
 
 export const fallback = async ({msg, command}) => {
