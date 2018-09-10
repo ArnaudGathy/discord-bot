@@ -38,7 +38,7 @@ export const commands = {
     info: 'Renvoie un gif random associé au mot clé unique fourni (!gif cry)'
   },
   random: {
-    action: ({msg}) => msg.reply(Math.random(100) + 1),
+    action: ({msg}) => msg.reply(`ton random : ${Math.floor((Math.random() * 100) + 1)}`),
     info: 'Renvoie un random entre 1 et 100'
   }
 }
