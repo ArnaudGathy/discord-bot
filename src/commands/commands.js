@@ -36,6 +36,10 @@ export const commands = {
   gif: {
     action: async ({msg, params}) => msg.channel.send(await getRandomGif(params)),
     info: 'Renvoie un gif random associé au mot clé unique fourni (!gif cry)'
+  },
+  random: {
+    action: (msg) => msg.reply(Math.random(100) + 1),
+    info: 'Renvoie un random entre 1 et 100'
   }
 }
 
