@@ -1,14 +1,17 @@
 import info from '../../package.json'
-import {type} from "os";
+import { type } from "os";
 import { getRandomGif } from '../utils/giphy';
+import { jdrChannel } from '../constants/channels/jdrChannel'
+import { filter } from 'ramda'
 
 const commandsToIgnore = ['mjroll']
+const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
 
 export const commands = {
   help: {
     action: ({msg}) =>
       msg.channel.send(
-        `# Commandes disponibles\n${Object.entries(commands.filter(command => !command['mjroll']))
+        `# Commandes disponibles\n${Object.entries(filter(commands, command => command.info))
           .map(([key, value]) => `* !${key} - ${value.info}`)
           .join('\n')}`,
         {code: 'markdown'}
@@ -40,16 +43,21 @@ export const commands = {
     info: 'Renvoie un gif random associé au mot clé unique fourni (!gif <mot_clé>)'
   },
   random: {
-    action: ({msg}) => msg.reply(`ton random : ${Math.floor((Math.random() * 100) + 1)}`),
+    action: ({msg}) => msg.reply(`ton random : ${(Math.random() * 100) + 1}`),
     info: 'Renvoie un random entre 1 et 100'
   },
   roll: {
     action: ({msg, params}) => {
-      const roll = Math.floor(Math.round((Math.random() * 100) + 1) / 5)
       const message = params ? `${msg.author}: ${roll} (jet) + ${params} (stats) = ${Math.round(roll + parseInt(params, 10))}` : `${msg.author}: ${roll}`
       msg.channel.send(message)
     },
-    infi: 'Renvoie un jet de dé 20 associé à une statistique (/roll <statistique>)'
+    info: 'Renvoie un jet de dé 20 associé à une statistique : /roll <statistique>. Pour faire un jet "vide" tapez juste /roll'
+  },
+  mjroll: {
+    action: ({msg, params}) => {
+      const fullRoll = params ? Math.round(roll + parseInt(params, 10)) : roll
+      client.channels.get(jdrChannel).send(`${msg.author}: ${fullRoll}`)
+    },
   }
 }
 
