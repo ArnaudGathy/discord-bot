@@ -82,11 +82,11 @@ export const commands = {
     action: ({msg, params}) => {
       const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
       const fullRoll = Math.round(roll + parseInt(params, 10))
-      const defaultMessage = params ? `${msg.author}: ${roll} (jet) + ${params} (stats) = ${fullRoll} (${getSuccessRate(fullRoll)})` : `${msg.author}: ${roll} (${getSuccessRate(fullRoll)})`
+      const defaultMessage = params ? `${msg.author}: ${roll} (jet) + ${params} (stats) = ${fullRoll} (${getSuccessRate(fullRoll)})` : `${msg.author}: ${roll} (${getSuccessRate(roll)})`
       const message = generateRollMessage(roll, defaultMessage, msg.author)
       msg.channel.send(message)
     },
-    info: 'Renvoie un jet de dé 20 associé à une statistique : /roll <statistique>. Pour faire un jet "vide" tapez juste /roll'
+    info: 'Renvoie un jet de dé 20 associé à une statistique : !roll <statistique>. Pour faire un jet "vide" tapez juste !roll'
   },
   mjroll: {
     action: ({msg, params, client}) => {
