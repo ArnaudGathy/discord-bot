@@ -46,7 +46,7 @@ export const commands = {
   roll: {
     action: ({msg, params}) => {
       const roll = Math.floor(Math.round((Math.random() * 100) + 1) / 5)
-      const message = params ? `${msg.author}: ${roll} + ${params} = ${Math.round(roll + params)}` : `${msg.author}: ${roll}`
+      const message = params ? `${msg.author}: ${roll} (jet) + ${params} (stats) = ${Math.round(roll + parseInt(params, 10))}` : `${msg.author}: ${roll}`
       msg.channel.send(message)
     },
     infi: 'Renvoie un jet de dé 20 associé à une statistique (/roll <statistique>)'
