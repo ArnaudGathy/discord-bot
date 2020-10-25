@@ -60,7 +60,7 @@ export const commands = {
       msg.channel.send(message)
     },
     info: 'Renvoie un jet de dé 100 (1 à 100) avec la localisation associée'
-  }
+  },
   mjroll: {
     action: ({msg, params, client}) => {
       const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
