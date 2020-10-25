@@ -6,6 +6,18 @@ import { filter } from 'ramda'
 
 const commandsToIgnore = ['mjroll']
 
+const generateRollMessage = (roll, defaultMessage) => {
+  let message
+  if(roll === 1) {
+    message = '1 - ECHEC CRITIQUE !'
+  } else if(roll === 20) {
+    message = '20 - SUCCESS CRITIQUE !'
+  } else {
+    message = defaultMessage
+  }
+  return message
+}
+
 export const commands = {
   help: {
     action: ({msg}) =>
@@ -48,7 +60,8 @@ export const commands = {
   roll: {
     action: ({msg, params}) => {
       const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
-      const message = params ? `${msg.author}: ${roll} (jet) + ${params} (stats) = ${Math.round(roll + parseInt(params, 10))}` : `${msg.author}: ${roll}`
+      const defaultMessage = params ? `${msg.author}: ${roll} (jet) + ${params} (stats) = ${Math.round(roll + parseInt(params, 10))}` : `${msg.author}: ${roll}`
+      const message = generateRollMessage(roll, defaultMessage)
       msg.channel.send(message)
     },
     info: 'Renvoie un jet de dé 20 associé à une statistique : /roll <statistique>. Pour faire un jet "vide" tapez juste /roll'
@@ -57,7 +70,9 @@ export const commands = {
     action: ({msg, params, client}) => {
       const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
       const fullRoll = params ? Math.round(roll + parseInt(params, 10)) : roll
-      client.channels.get(jdrChannel).send(`${msg.author}: ${fullRoll}`)
+      const defaultMessage = `${msg.author}: ${fullRoll}`
+      const message = generateRollMessage(roll, defaultMessage)
+      client.channels.get(jdrChannel).sendmessage()
     },
   }
 }
