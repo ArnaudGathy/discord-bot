@@ -16,4 +16,4 @@ client.on('ready', () => {
   }
 });
 
-client.on('message', messageHandler)
+client.on('message', msg => messageHandler(msg, client))

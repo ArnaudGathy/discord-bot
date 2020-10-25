@@ -5,7 +5,6 @@ import { jdrChannel } from '../constants/channels'
 import { filter } from 'ramda'
 
 const commandsToIgnore = ['mjroll']
-const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
 
 export const commands = {
   help: {
@@ -48,13 +47,15 @@ export const commands = {
   },
   roll: {
     action: ({msg, params}) => {
+      const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
       const message = params ? `${msg.author}: ${roll} (jet) + ${params} (stats) = ${Math.round(roll + parseInt(params, 10))}` : `${msg.author}: ${roll}`
       msg.channel.send(message)
     },
     info: 'Renvoie un jet de dé 20 associé à une statistique : /roll <statistique>. Pour faire un jet "vide" tapez juste /roll'
   },
   mjroll: {
-    action: ({msg, params}) => {
+    action: ({msg, params, client}) => {
+      const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
       const fullRoll = params ? Math.round(roll + parseInt(params, 10)) : roll
       client.channels.get(jdrChannel).send(`${msg.author}: ${fullRoll}`)
     },
