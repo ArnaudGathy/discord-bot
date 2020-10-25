@@ -94,7 +94,7 @@ export const commands = {
       const fullRoll = params ? Math.round(roll + parseInt(params, 10)) : roll
       const defaultMessage = `${msg.author}: ${fullRoll} (${getSuccessRate(fullRoll)})`
       const message = generateRollMessage(roll, defaultMessage, msg.author)
-      client.channels.get(jdrChannel).sendmessage()
+      client.channels.get(jdrChannel).send(message)
     },
   }
 }
