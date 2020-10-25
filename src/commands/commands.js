@@ -6,12 +6,13 @@ import { filter } from 'ramda'
 
 const commandsToIgnore = ['mjroll']
 
-const generateRollMessage = (roll, defaultMessage, author) => {
+const generateRollMessage = (roll, defaultMessage, author, isGm = false) => {
+  const authorName = `${author}${isGm ? ' - Maître du jeu' : ''}`
   let message
   if(roll === 1) {
-    message = `${author}: 1 - ÉCHEC CRITIQUE !`
+    message = `${authorName} : 1 - ÉCHEC CRITIQUE !`
   } else if(roll === 20) {
-    message = `${author}: 20 - SUCCÈS CRITIQUE !`
+    message = `${authorName} : 20 - SUCCÈS CRITIQUE !`
   } else {
     message = defaultMessage
   }
@@ -82,7 +83,7 @@ export const commands = {
     action: ({msg, params}) => {
       const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
       const fullRoll = Math.round(roll + parseInt(params, 10))
-      const defaultMessage = params ? `${msg.author}: ${roll} (jet) + ${params} (stats) = ${fullRoll} (${getSuccessRate(fullRoll)})` : `${msg.author}: ${roll} (${getSuccessRate(roll)})`
+      const defaultMessage = params ? `${msg.author} : ${roll} (jet) + ${params} (stats) = ${fullRoll} (${getSuccessRate(fullRoll)})` : `${msg.author} : ${roll} (${getSuccessRate(roll)})`
       const message = generateRollMessage(roll, defaultMessage, msg.author)
       msg.channel.send(message)
     },
@@ -92,8 +93,16 @@ export const commands = {
     action: ({msg, params, client}) => {
       const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
       const fullRoll = params ? Math.round(roll + parseInt(params, 10)) : roll
-      const defaultMessage = `${msg.author}: ${fullRoll} (${getSuccessRate(fullRoll)})`
-      const message = generateRollMessage(roll, defaultMessage, msg.author)
+      const defaultMessage = `${msg.author} - Maître du jeu : ${fullRoll} (${getSuccessRate(fullRoll)})`
+      const message = generateRollMessage(roll, defaultMessage, msg.author, true)
+      client.channels.get(jdrChannel).send(message)
+    },
+  },
+  mjtriche: {
+    action: ({msg, params, client}) => {
+      const roll = parseInt(params, 10) || Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
+      const defaultMessage = `${msg.author} - Maître du jeu : ${roll} (${getSuccessRate(roll)})`
+      const message = generateRollMessage(roll, defaultMessage, msg.author, true)
       client.channels.get(jdrChannel).send(message)
     },
   }
