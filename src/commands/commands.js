@@ -54,7 +54,7 @@ export const commands = {
     info: 'Renvoie un jet de dé 20 associé à une statistique : !roll <statistique>. Pour faire un jet "vide" tapez juste !roll'
   },
   localisation: {
-    action: () => {
+    action: ({msg}) => {
       const roll =  Math.floor((Math.random() * 100) + 1)
       const message = getLocalisationMessage(roll, msg.author)
       msg.channel.send(message)
