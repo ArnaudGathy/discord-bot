@@ -18,6 +18,27 @@ const generateRollMessage = (roll, defaultMessage, author) => {
   return message
 }
 
+const getSuccessRate = (roll) => {
+  if(roll <= 0) {
+    return 'échec critique'
+  }
+  if(roll >= 1 && roll <= 5) {
+    return 'échec'
+  }
+  if(roll >= 6 && roll <= 10) {
+    return 'succès partiel'
+  }
+  if(roll >= 11 && roll <= 15) {
+    return 'succès'
+  }
+  if(roll >= 16 && roll <= 22) {
+    return 'succès critique'
+  }
+  if(roll >= 23 ) {
+    return 'succès héroique'
+  }
+}
+
 export const commands = {
   help: {
     action: ({msg}) =>
@@ -60,7 +81,8 @@ export const commands = {
   roll: {
     action: ({msg, params}) => {
       const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
-      const defaultMessage = params ? `${msg.author}: ${roll} (jet) + ${params} (stats) = ${Math.round(roll + parseInt(params, 10))}` : `${msg.author}: ${roll}`
+      const fullRoll = Math.round(roll + parseInt(params, 10))
+      const defaultMessage = params ? `${msg.author}: ${roll} (jet) + ${params} (stats) = ${fullRoll} (${getSuccessRate(fullRoll)})` : `${msg.author}: ${roll} (${getSuccessRate(fullRoll)})`
       const message = generateRollMessage(roll, defaultMessage, msg.author)
       msg.channel.send(message)
     },
@@ -70,7 +92,7 @@ export const commands = {
     action: ({msg, params, client}) => {
       const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
       const fullRoll = params ? Math.round(roll + parseInt(params, 10)) : roll
-      const defaultMessage = `${msg.author}: ${fullRoll}`
+      const defaultMessage = `${msg.author}: ${fullRoll} (${getSuccessRate(fullRoll)})`
       const message = generateRollMessage(roll, defaultMessage, msg.author)
       client.channels.get(jdrChannel).sendmessage()
     },
