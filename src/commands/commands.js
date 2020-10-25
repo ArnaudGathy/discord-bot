@@ -6,12 +6,12 @@ import { filter } from 'ramda'
 
 const commandsToIgnore = ['mjroll']
 
-const generateRollMessage = (roll, defaultMessage) => {
+const generateRollMessage = (roll, defaultMessage, author) => {
   let message
   if(roll === 1) {
-    message = '1 - ECHEC CRITIQUE !'
+    message = `${author}: 1 - ÉCHEC CRITIQUE !`
   } else if(roll === 20) {
-    message = '20 - SUCCESS CRITIQUE !'
+    message = `${author}: 20 - SUCCÈS CRITIQUE !`
   } else {
     message = defaultMessage
   }
@@ -22,7 +22,7 @@ export const commands = {
   help: {
     action: ({msg}) =>
       msg.channel.send(
-        `# Commandes disponibles\n${Object.entries(filter(commands, command => command.info))
+        `# Commandes disponibles\n${Object.entries(filter(command => command.info, commands))
           .map(([key, value]) => `* !${key} - ${value.info}`)
           .join('\n')}`,
         {code: 'markdown'}
@@ -54,14 +54,14 @@ export const commands = {
     info: 'Renvoie un gif random associé au mot clé unique fourni (!gif <mot_clé>)'
   },
   random: {
-    action: ({msg}) => msg.reply(`ton random : ${(Math.random() * 100) + 1}`),
+    action: ({msg}) => msg.reply(`ton random : ${Math.floor((Math.random() * 100) + 1)}`),
     info: 'Renvoie un random entre 1 et 100'
   },
   roll: {
     action: ({msg, params}) => {
       const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
       const defaultMessage = params ? `${msg.author}: ${roll} (jet) + ${params} (stats) = ${Math.round(roll + parseInt(params, 10))}` : `${msg.author}: ${roll}`
-      const message = generateRollMessage(roll, defaultMessage)
+      const message = generateRollMessage(roll, defaultMessage, msg.author)
       msg.channel.send(message)
     },
     info: 'Renvoie un jet de dé 20 associé à une statistique : /roll <statistique>. Pour faire un jet "vide" tapez juste /roll'
@@ -71,7 +71,7 @@ export const commands = {
       const roll = Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
       const fullRoll = params ? Math.round(roll + parseInt(params, 10)) : roll
       const defaultMessage = `${msg.author}: ${fullRoll}`
-      const message = generateRollMessage(roll, defaultMessage)
+      const message = generateRollMessage(roll, defaultMessage, msg.author)
       client.channels.get(jdrChannel).sendmessage()
     },
   }
