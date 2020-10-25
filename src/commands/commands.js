@@ -1,7 +1,7 @@
 import info from '../../package.json'
 import { type } from "os";
 import { getRandomGif } from '../utils/giphy';
-import { jdrChannel } from '../constants/channels/jdrChannel'
+import { jdrChannel } from '../constants/channels'
 import { filter } from 'ramda'
 
 const commandsToIgnore = ['mjroll']
