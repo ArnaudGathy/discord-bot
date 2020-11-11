@@ -5,24 +5,20 @@ const timers = [
     name: "Skadi le brutal",
     loot: "Monture : proto-drake bleu",
     location: '/way 57.8 56.1',
-    times: [{timer: 'Mercredi, 8:20', cron: '0 15 8 ? * WED *'}]
+    times: [{timer: 'Mercredi, 8:20', cron: '15 8 * * 3'}]
   },
   {
     name: "Bronjahm",
     loot: "Sac 34 places",
     location: '/way 70.7 38.4',
-    times: [{timer: 'Mercredi, 9:40', cron: '0 35 9 ? * WED *'}]
+    times: [{timer: 'Mercredi, 9:40', cron: '35 9 * * 3'}]
   }
 ]
 
 const testTimers = [
   {
     name: 'cron 1',
-    times: [{cron: '* * * * *'}],
-  },
-  {
-    name: 'TEST',
-    times: [{cron: '* * * * *'}],
+    times: [{cron: '50 16 * * 3'}],
   }
 ]
 
