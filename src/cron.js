@@ -38,10 +38,11 @@ const testTimers = [
 
 
 const spawnRareChannel = '776098372826038303'
+const testChannel = '486618253813088276'
 
 const sendMessage = (client, timer, {name, loot, location}) => {
   const message = `${name} (${loot}) pop dans 5 minutes (${timer}) aux coordonnées : ${location}`
-  client.channels.get(spawnRareChannel).send(message)
+  client.channels.get(testChannel).send(message)
 }
 
 export const runCrons = (client) => {
