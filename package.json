@@ -14,11 +14,12 @@
     "pm2:setup": "pm2 start build/index.js --name \"discord-bot\" && pm2 stop discord-bot"
   },
   "dependencies": {
-    "discord.js": "^11.4.2",
-    "weasel.js": "^1.0.0",
     "axios": "0.18.1",
+    "discord.js": "^11.4.2",
     "dotenv": "6.0.0",
-    "ramda": "0.27.1"
+    "node-cron": "^2.0.3",
+    "ramda": "0.27.1",
+    "weasel.js": "^1.0.0"
   },
   "devDependencies": {
     "babel-cli": "^6.26.0",

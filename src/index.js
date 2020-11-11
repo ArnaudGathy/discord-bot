@@ -1,4 +1,5 @@
 require('dotenv').config()
+import {runCrons} from './cron'
 import Discord from 'discord.js'
 import { messageHandler } from './events/message';
 import auth from './constants/auth'
@@ -17,3 +18,5 @@ client.on('ready', () => {
 });
 
 client.on('message', msg => messageHandler(msg, client))
+
+runCrons(client)
