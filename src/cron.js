@@ -8,6 +8,7 @@ const timers = [
     times: [
       {timer: 'Mercredi, 15:00', cron: '55 14 * * 3'},
       {timer: 'Mercredi, 21:40', cron: '35 21 * * 3'},
+      {timer: 'Mercredi, 21:48 (THIS IS A TEST)', cron: '48 21 * * 3'},
       {timer: 'Jeudi, 11:00', cron: '55 10 * * 4'},
       {timer: 'Jeudi, 17:40', cron: '35 17 * * 4'},
       {timer: 'Vendredi, 13:40', cron: '35 13 * * 5'},
