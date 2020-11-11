@@ -18,11 +18,11 @@ const timers = [
 const testTimers = [
   {
     name: 'cron 1',
-    times: [{cron: '0 * 0 ? * * *'}],
+    times: [{cron: '* * * * *'}],
   },
   {
     name: 'TEST',
-    times: [{cron: '0 * 0 ? * * *'}],
+    times: [{cron: '* * * * *'}],
   }
 ]
 
