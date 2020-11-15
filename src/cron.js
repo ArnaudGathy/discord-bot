@@ -49,11 +49,11 @@ const timers = [
 
 const spawnRareChannel = '776098372826038303'
 
-const sendMessage = (client, { name, loot, location, url, icon, loot_icon }, nextSpawn) => {
+const sendMessage = (client, timer, { name, loot, location, url, icon, loot_icon }, nextSpawn) => {
   const message = new Discord.RichEmbed()
     .setColor('#0099ff')
     .setTitle(name)
-    .setDescription(loot)
+    .setDescription(`${loot}\nPop dans **5 minutes (${timer})**`)
     .setURL(url)
     .setThumbnail(icon)
     .addField('Localisation', `\`${location}\``)
@@ -68,7 +68,7 @@ export const runCrons = (client) => {
       cron
         .schedule(
           time.cron,
-          () => sendMessage(client, timerData, i + 1 >= timerData.times.length ?
+          () => sendMessage(client, time.timer, timerData, i + 1 >= timerData.times.length ?
             timerData.times[0] : timerData.times[i + 1]),
           {}
         )
