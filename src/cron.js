@@ -11,7 +11,7 @@ const timers = [
     url: 'https://www.wowhead.com/npc=174062/skadi-the-ruthless',
     icon: 'https://wow.zamimg.com/uploads/screenshots/normal/993107-skadi-the-ruthless.jpg',
     times: [
-      {timer: 'Dimanche, 19:00', cron: '55 18 * * 7'},
+      {timer: 'Dimanche, 19:00', cron: '50 18 * * 7'},
       {timer: 'Lundi, 01:40', cron: '30 1 * * 1'},
       {timer: 'Lundi, 08:20', cron: '10 8 * * 1'},
       {timer: 'Lundi, 15:00', cron: '50 14 * * 1'},
@@ -26,7 +26,7 @@ const timers = [
     url: 'https://www.wowhead.com/npc=174058/bronjahm',
     icon: 'https://wow.zamimg.com/uploads/screenshots/normal/993294-bronjahm.jpg',
     times: [
-      {timer: 'Dimanche, 20:20', cron: '15 20 * * 7'},
+      {timer: 'Dimanche, 20:20', cron: '10 20 * * 7'},
       {timer: 'Lundi, 09:40', cron: '30 9 * * 1'},
       {timer: 'Lundi, 16:20', cron: '10 16 * * 1'},
       {timer: 'Lundi, 23:00', cron: '50 22 * * 1'},
