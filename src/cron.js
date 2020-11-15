@@ -35,7 +35,7 @@ const timers = [
 ]
 
 const sendMessage = (client, timer, { name, loot, location, url, icon, loot_icon }, nextSpawn) => {
-  let message = new Discord.RichEmbed()
+  const message = new Discord.RichEmbed()
     .setColor('#0099ff')
     .setTitle(name)
     .setDescription(`${loot}\nPop dans **10 minutes (${timer})**`)
