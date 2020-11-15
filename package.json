@@ -21,6 +21,7 @@
     "ramda": "0.27.1",
     "weasel.js": "^1.0.0"
   },
+
   "devDependencies": {
     "babel-cli": "^6.26.0",
     "babel-plugin-transform-class-properties": "6.24.1",

@@ -1,8 +1,8 @@
 import info from '../../package.json'
 import { type } from "os";
 import { getRandomGif } from '../utils/giphy';
-import { jdrChannel } from '../constants/channels'
 import { filter } from 'ramda'
+import { channels } from '../constants/channels'
 
 export const commands = {
   help: {
@@ -67,7 +67,7 @@ export const commands = {
       const fullRoll = params ? Math.round(roll + parseInt(params, 10)) : roll
       const defaultMessage = `${msg.author} - Maître du jeu : ${fullRoll} (${getSuccessRate(fullRoll)})`
       const message = generateRollMessage(roll, defaultMessage, msg.author, true)
-      client.channels.get(jdrChannel).send(message)
+      client.channels.get(channels.jdrChannel).send(message)
     },
   },
   mjtriche: {
@@ -75,7 +75,7 @@ export const commands = {
       const roll = parseInt(params, 10) || Math.round(Math.floor(Math.random() * Math.floor(20) + 1))
       const defaultMessage = `${msg.author} - Maître du jeu : ${roll} (${getSuccessRate(roll)})`
       const message = generateRollMessage(roll, defaultMessage, msg.author, true)
-      client.channels.get(jdrChannel).send(message)
+      client.channels.get(channels.jdrChannel).send(message)
     },
   }
 }
