@@ -1,10 +1,14 @@
 import cron from 'node-cron'
+const Discord = require('discord.js');
 
 const timers = [
   {
     name: 'Skadi le brutal',
     loot: 'Monture : proto-drake bleu',
+    loot_icon: 'https://wow.zamimg.com/uploads/screenshots/normal/109195-reins-of-the-blue-proto-drake.jpg',
     location: '/way 57.8 56.1',
+    url: 'https://www.wowhead.com/npc=174062/skadi-the-ruthless',
+    icon: 'https://wow.zamimg.com/uploads/screenshots/normal/993107-skadi-the-ruthless.jpg',
     times: [
       {timer: 'Mercredi, 15:00', cron: '55 14 * * 3'},
       {timer: 'Mercredi, 21:40', cron: '35 21 * * 3'},
@@ -22,7 +26,10 @@ const timers = [
   {
     name: 'Bronjahm',
     loot: 'Sac 34 places',
+    loot_icon: 'https://wow.zamimg.com/images/wow/icons/large/inv_misc_bag_26_spellfire.jpg',
     location: '/way 70.7 38.4',
+    url: 'https://www.wowhead.com/npc=174058/bronjahm',
+    icon: 'https://wow.zamimg.com/uploads/screenshots/normal/993294-bronjahm.jpg',
     times: [
       {timer: 'Mercredi, 9:40', cron: '35 9 * * 3'},
       {timer: 'Mercredi, 16:20', cron: '15 16 * * 3'},
@@ -42,18 +49,27 @@ const timers = [
 
 const spawnRareChannel = '776098372826038303'
 
-const sendMessage = (client, timer, {name, loot, location}) => {
-  const message = `**${name}** (${loot}) pop dans **5 minutes (${timer})** aux coordonnées : **${location}**`
+const sendMessage = (client, timer, { name, loot, location, url, icon, loot_icon }, nextSpawn) => {
+  const message = new Discord.RichEmbed()
+    .setColor('#0099ff')
+    .setTitle(name)
+    .setDescription(`${loot}\nPop dans **5 minutes (${timer})**`)
+    .setURL(url)
+    .setThumbnail(icon)
+    .addField('Localisation', `\`${location}\``)
+    .setImage(loot_icon)
+    .setFooter(`Prochain spawn le ${nextSpawn.timer}`);
   client.channels.get(spawnRareChannel).send(message)
 }
 
 export const runCrons = (client) => {
   timers.forEach((timerData) =>
-    timerData.times.forEach((time) =>
+    timerData.times.forEach((time, i) =>
       cron
         .schedule(
           time.cron,
-          () => sendMessage(client, time.timer, timerData),
+          () => sendMessage(client, time.timer, timerData, i + 1 >= timerData.times.length ?
+            timerData.times[0] : timerData.times[i + 1]),
           {}
         )
         .start()
