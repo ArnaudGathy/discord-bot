@@ -1,7 +1,6 @@
 import moment from 'moment-timezone';
 import { channels } from './constants/channels'
 const Discord = require('discord.js');
-// TODO(pc): Create an infinite loop
 
 // Get ref_date from wowhead link of each mob
 const timers = [
@@ -47,7 +46,7 @@ const sendMessage = (client, { name, loot, location, url, icon, loot_icon }, tim
     .setImage(loot_icon)
     .setFooter(printableNextSpawnDate ? `Prochain spawn le ${printableNextSpawnDate}` : 'Pas de prochaine date encodée')
 
-  client.channels.get(channels.spawnRareChannel).send(message)
+  client.channels.get(channels.spawnRareChannel).send(message).then((message) => message.pin())
 }
 
 export const runCrons = (client) => {
