@@ -12,7 +12,7 @@ const timers = [
     location: '/way 57.8 56.1',
     url: 'https://www.wowhead.com/npc=174062/skadi-the-ruthless',
     icon: 'https://wow.zamimg.com/uploads/screenshots/normal/993107-skadi-the-ruthless.jpg',
-    ref_date: '2020-11-15 05:40:00',
+    ref_date: '2020-11-15 05:40',
   },
   {
     name: 'Bronjahm',
@@ -53,23 +53,18 @@ const sendMessage = (client, { name, loot, location, url, icon, loot_icon }, tim
 export const runCrons = (client) => {
   timers.forEach((timerData) => {
     let cursor = moment.tz(timerData.ref_date, 'Europe/Paris');
-    console.log('cursor init:', cursor);
     const dateNow = moment.tz('Europe/Paris');
 
     // Increment cursor by 6 hours and 40 minutes from reference date
     // to get next spawn time.
     for (cursor = moment.tz(timerData.ref_date, 'Europe/Paris');
       cursor < dateNow;
-      cursor.add(6, 'h').add(40, 'm')) {
-      console.log(`increment cursor for ${timerData.name}: ${cursor}, date now: ${dateNow}`);
-    }
-
-    console.log(`Next date for ${timerData.name}: ${cursor}`);
+      cursor.add(6, 'h').add(40, 'm')) { }
 
     // cursor is now the next spawn date
     // so we calculate how long we setTimeout
     const timeUntilNextSpawn = cursor.diff(dateNow);
-    console.log(`we're waiting: ${timeUntilNextSpawn / min}min ${timeUntilNextSpawn / hour}h`);
+    console.log(`Next date of spawn for ${timerData.name}: ${cursor}`);
 
     // So setTimeout until next one spawn minus 10 minutes
     setTimeout(() => {
