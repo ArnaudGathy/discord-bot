@@ -39,7 +39,7 @@ const sendMessage = (client, { name, loot, location, url, icon, loot_icon }, tim
   const message = new Discord.RichEmbed()
     .setColor('#0099ff')
     .setTitle(name)
-    .setDescription(`${loot}\nPop dans **${Math.round(diff / min)} minutes (${printableSpawnDate})**`)
+    .setDescription(`${loot}\nPop dans **10 minutes (${printableSpawnDate})**`)
     .setURL(url)
     .setThumbnail(icon)
     .addField('Localisation', `\`${location}\``)
