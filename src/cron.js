@@ -34,7 +34,7 @@ const formatDate = (time) => {
 
 const sendMessage = (client, { name, loot, location, url, icon, loot_icon }, timer, diff) => {
   const printableSpawnDate = formatDate(timer);
-  const printableNextSpawnDate = formatDate(timer.add(6, 'h').add(40, 'm'));
+  const printableNextSpawnDate = formatDate(timer.add(3, 'h').add(20, 'm'));
 
   const message = new Discord.RichEmbed()
     .setColor('#0099ff')
@@ -58,7 +58,7 @@ export const runCrons = (client) => {
     // to get next spawn time.
     for (cursor = moment.tz(timerData.ref_date, 'Europe/Paris');
       cursor < dateNow;
-      cursor.add(6, 'h').add(40, 'm')) { }
+      cursor.add(3, 'h').add(20, 'm')) { }
 
     // cursor is now the next spawn date
     // so we calculate how long we setTimeout
