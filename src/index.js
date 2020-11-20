@@ -19,4 +19,5 @@ client.on('ready', () => {
 
 client.on('message', msg => messageHandler(msg, client))
 
-runCrons(client)
+// Disabled rare spawn announcements
+// runCrons(client)
