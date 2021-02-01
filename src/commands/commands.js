@@ -1,8 +1,9 @@
-import info from '../../package.json'
-import { type } from "os";
+import info from '../../package.json';
+import { type } from "os";;
 import { getRandomGif } from '../utils/giphy';
-import { filter } from 'ramda'
-import { channels } from '../constants/channels'
+import { filter } from 'ramda';
+import { channels } from '../constants/channels';
+import { excuseCmd, excuseInfo } from './excuse';
 
 export const commands = {
   help: {
@@ -34,6 +35,14 @@ export const commands = {
   hello: {
     action: ({msg}) => msg.channel.send(`Kikoo ${msg.author} ( ͡° ͜ʖ ͡°)`),
     info: 'Dites bonjour au bot !',
+  },
+  excuse: {
+    action: excuseCmd,
+    info: 'Retourne la liste des excuses ou ajoute une excuse au codexcuse: '+ excuseInfo,
+  },
+  excuses: {
+    action: excuseCmd,
+    info: 'Retourne la liste des excuses',
   },
   gif: {
     action: async ({msg, params}) => msg.channel.send(await getRandomGif(params)),

@@ -1,0 +1,12 @@
+{
+    "token": {
+        "discord_app": "discord app token",
+        "discord": "discord token",
+        "client_id": "client id",
+        "pub_key": "supersecretkey"
+    },
+    "apiStorage": {
+        "username": "username",
+        "password": "password"
+    }
+}
