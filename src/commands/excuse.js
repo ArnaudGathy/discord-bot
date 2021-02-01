@@ -95,7 +95,7 @@ function addExcuse(msg, client, excuseContent) {
         title: "Excuse", // Mandatory field for the API, but useless in our cases.
         content: excuseContent,
         author: {
-            id: msg.author.id,
+            id: author.id,
             username: `${author.username}#${author.discriminator} `,
         },
         reporter: {
