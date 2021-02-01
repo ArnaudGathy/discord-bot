@@ -12,9 +12,3 @@ replace fields in accordance
 ```bash
 yarn run dev
 ```
-
-## To run in dev with Docker
-
-```bash
-docker run --rm -it --init -v $PWD:/usr/src blaze-discord-bot yarn run dev
-```
