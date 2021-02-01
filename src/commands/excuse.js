@@ -132,4 +132,4 @@ export const excuseCmd = ({ msg, client }) => {
     return addExcuse(msg, client, excuseContent);
 };
 
-export const excuseInfo = excusePrefix + '<contenu_de_l\'excuse> <pseudo_de_l\'auteur>';
+export const excuseInfo = excusePrefix + ' <contenu_de_l\'excuse> <pseudo_de_l\'auteur>';
