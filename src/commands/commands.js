@@ -1,5 +1,5 @@
 import info from '../../package.json';
-import { type } from "os";;
+import { type } from "os";
 import { getRandomGif } from '../utils/giphy';
 import { filter } from 'ramda';
 import { channels } from '../constants/channels';
