@@ -1,9 +1,7 @@
 {
     "token": {
-        "discord_app": "discord app token",
         "discord": "discord token",
-        "client_id": "client id",
-        "pub_key": "supersecretkey"
+        "giphy": "giphy_token"
     },
     "apiStorage": {
         "username": "username",
