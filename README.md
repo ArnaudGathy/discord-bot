@@ -10,5 +10,5 @@ replace fields in accordance
 ## To run in dev
 
 ```bash
-yarn run dev
+yarn dev
 ```
