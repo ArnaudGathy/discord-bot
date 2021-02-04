@@ -7,12 +7,10 @@ const excusePrefix = '!excuse'
 const username = auth.apiStorage.username
 const password = auth.apiStorage.password
 const baseUrl = `${auth.apiStorage.baseURL}/api/codexcuses`
-const request = {
-  headers: {
-    Authorization: `Basic ${Buffer.from(username + ':' + password).toString(
-      'base64'
-    )}`,
-  },
+const headers = {
+  Authorization: `Basic ${Buffer.from(username + ':' + password).toString(
+    'base64'
+  )}`,
 }
 
 function formatExcuses(body) {
@@ -51,11 +49,10 @@ function getExcuseCmd(msg, client) {
 
   ;(async () => {
     try {
-      // const response = await gotClient.get(requestURL)
       const response = await axios({
         method: 'get',
         url: `${baseUrl}/${requestURL}`,
-        ...request,
+        headers,
       })
 
       console.log('Get: resp status', response.status)
@@ -116,10 +113,10 @@ function addExcuse(msg, client, excuseContent) {
   ;(async () => {
     try {
       const response = await axios({
-          method: 'post',
-          url: `${baseUrl}/${requestURL}`,
-          data: formBody,
-          ...request,
+        method: 'post',
+        url: `${baseUrl}/${requestURL}`,
+        data: formBody,
+        headers,
       })
       console.log('resp status', response.status)
       console.log('resp body', response.data)
