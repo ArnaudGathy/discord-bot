@@ -33,5 +33,13 @@
     "babel-preset-stage-3": "6.24.1",
     "nodemon": "^1.18.4",
     "prettier": "1.19.1"
+  },
+  "lint-staged": {
+    "*.{js,json,md}": "prettier --write"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "lint-staged"
+    }
   }
 }

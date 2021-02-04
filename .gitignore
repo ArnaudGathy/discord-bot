@@ -12,3 +12,5 @@
 #.env variables
 .env
 .env.local
+
+.idea
