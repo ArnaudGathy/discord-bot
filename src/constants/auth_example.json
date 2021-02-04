@@ -1,10 +1,11 @@
 {
-    "token": {
-        "discord": "discord token",
-        "giphy": "giphy_token"
-    },
-    "apiStorage": {
-        "username": "username",
-        "password": "password"
-    }
+  "token": {
+    "discord": "discord_token",
+    "giphy": "giphy_token"
+  },
+  "apiStorage": {
+    "username": "username",
+    "password": "password",
+    "baseURL": "url"
+  }
 }
