@@ -1,21 +1,19 @@
 const Discord = require('discord.js')
 import auth from '../constants/auth'
 import {channels} from '../constants/channels'
-import got from 'got'
+import axios from 'axios'
 
 const excusePrefix = '!excuse'
 const username = auth.apiStorage.username
 const password = auth.apiStorage.password
-
-const gotClient = got.extend({
-  prefixUrl: `${auth.apiStorage.baseURL}/api/codexcuses`,
-  responseType: 'json',
+const baseUrl = `${auth.apiStorage.baseURL}/api/codexcuses`
+const request = {
   headers: {
     Authorization: `Basic ${Buffer.from(username + ':' + password).toString(
       'base64'
     )}`,
   },
-})
+}
 
 function formatExcuses(body) {
   const message = new Discord.RichEmbed()
@@ -53,12 +51,18 @@ function getExcuseCmd(msg, client) {
 
   ;(async () => {
     try {
-      const response = await gotClient.get(requestURL)
-      console.log('Get: resp status', response.statusCode)
-      console.log('Get: resp body', response.body)
+      // const response = await gotClient.get(requestURL)
+      const response = await axios({
+        method: 'get',
+        url: `${baseUrl}/${requestURL}`,
+        ...request,
+      })
 
-      if (response.body != null && response.body.length > 0) {
-        return msg.channel.send(formatExcuses(response.body))
+      console.log('Get: resp status', response.status)
+      console.log('Get: resp body', response.data)
+
+      if (response.data != null && response.data.length > 0) {
+        return msg.channel.send(formatExcuses(response.data))
       }
       msg.channel.send(
         `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseInfo}\``
@@ -111,11 +115,15 @@ function addExcuse(msg, client, excuseContent) {
 
   ;(async () => {
     try {
-      const response = await gotClient.post(requestURL, {
-        json: formBody,
+      const response = await axios({
+          method: 'post',
+          url: `${baseUrl}/${requestURL}`,
+          data: formBody,
+          ...request,
       })
-      console.log('resp status', response.statusCode)
-      console.log('resp body', response.body)
+      console.log('resp status', response.status)
+      console.log('resp body', response.data)
+
       return msg.channel.send('Excuse ajoutée :+1:')
     } catch (error) {
       logError('Codexcuse', `Error during the POST: ${error} `, client, msg)

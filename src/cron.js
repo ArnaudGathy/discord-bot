@@ -83,7 +83,6 @@ export const runCrons = client => {
     // cursor is now the next spawn date
     // so we calculate how long we setTimeout
     const timeUntilNextSpawn = cursor.diff(dateNow)
-    console.log(`Next date of spawn for ${timerData.name}: ${cursor}`)
 
     // So setTimeout until next one spawn minus 10 minutes
     setTimeout(() => {

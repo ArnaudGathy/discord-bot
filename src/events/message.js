@@ -2,7 +2,6 @@ import {isCommand, getContent} from '../utils/messageUtils'
 import {commands, fallback} from '../commands/commands'
 
 export const messageHandler = (msg, client) => {
-  console.log(msg)
   if (isCommand(msg.content)) {
     const content = getContent(msg.content)
     const split = content.split(' ')
