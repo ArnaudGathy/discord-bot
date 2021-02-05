@@ -95,7 +95,7 @@ function addExcuse(msg, client, excuseContent) {
 
   // As mentions in message is formatted like <@!user_id>
   // We remove the mention from message content.
-  excuseContent = excuseContent.replace(/<@!\w+>/g, '')
+  excuseContent = excuseContent.replace(/<@!?(\d+)>/g, '')
   const author = msg.mentions.users.first()
   const formBody = {
     title: 'Excuse', // Mandatory field for the API, but useless in our cases.
