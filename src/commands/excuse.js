@@ -38,7 +38,7 @@ function logError(contextName, error, client, msg) {
       'Happened on Channel',
       `'${msg.channel.name}' <#${msg.channel.id}>`
     )
-    .addField('Concerned command', `'${msg.channel.name}' <#${msg.channel.id}>`)
+    .addField('Concerned command', msg.content)
     .setDescription(error)
 
   botChan.send(embedMessage)
