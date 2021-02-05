@@ -1,6 +1,6 @@
 const Discord = require('discord.js')
 import auth from '../constants/auth'
-import {channels} from '../constants/channels'
+import { channels } from '../constants/channels'
 import axios from 'axios'
 
 const excusePrefix = '!excuse'
@@ -131,7 +131,48 @@ function addExcuse(msg, client, excuseContent) {
   })()
 }
 
-export const excuseCmd = ({msg, client}) => {
+function getRandomExcuse(msg, client) {
+  const requestURL = msg.guild.id;
+
+  (async () => {
+    try {
+      const response = await axios({
+        method: 'get',
+        url: `${baseUrl}/${requestURL}`,
+        headers,
+      })
+
+      if (response.data != null && response.data.length > 0) {
+        const rdmExcusePos = Math.floor(Math.random() * response.data.length + 1)
+        const excuse = response.data[rdmExcusePos - 1]
+        const message = new Discord.RichEmbed()
+          .setColor('#0099ff')
+          .setTitle("Random excuse")
+
+        message.addField(
+          `Excuse N°${rdmExcusePos}`,
+          `<@${excuse.author.id}>: ${excuse.content}`
+        )
+        return msg.channel.send(message)
+      }
+      msg.channel.send(
+        `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseInfo}\``
+      )
+    } catch (error) {
+      logError(
+        'Codexcuse random',
+        `Error during add excuse POST request: ${error} `,
+        client,
+        msg
+      )
+      msg.channel.send(
+        "Désolé, petit problème interne, j'en ai notifié mes propriétaires"
+      )
+    }
+  })()
+}
+
+export const excuseCmd = ({ msg, client }) => {
   const msgContent = msg.content.trim()
   const excuseContent = msgContent.slice(excusePrefix.length)
 
@@ -140,9 +181,13 @@ export const excuseCmd = ({msg, client}) => {
   if (excuseContent.trim() === '' || excuseContent.startsWith('s')) {
     return getExcuseCmd(msg, client)
   }
+  if (excuseContent.trim() === 'random') {
+    return getRandomExcuse(msg, client)
+  }
 
   return addExcuse(msg, client, excuseContent)
 }
 
 export const excuseInfo =
-  excusePrefix + " <contenu_de_l'excuse> <pseudo_de_l'auteur>"
+  excusePrefix + ` <contenu_de_l'excuse> <pseudo_de_l'auteur>
+* !excuse random - retourne une excuse random parmi la liste des excuses`
