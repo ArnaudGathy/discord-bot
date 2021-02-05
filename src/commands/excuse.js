@@ -137,7 +137,7 @@ export const excuseCmd = ({msg, client}) => {
 
   // Case of !excuse without arguments or !excuses, hence list all excuses
   // if !excuses is used argument are ignored
-  if (excuseContent.trim() === '' || excuseContent.trim().startsWith('s')) {
+  if (excuseContent.trim() === '' || excuseContent.startsWith('s')) {
     return getExcuseCmd(msg, client)
   }
 
