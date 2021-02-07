@@ -3,7 +3,7 @@ import {type} from 'os'
 import {getRandomGif} from '../utils/giphy'
 import {filter} from 'ramda'
 import {channels} from '../constants/channels'
-import {excuseCmd, excuseInfo} from './excuse'
+import {excuseCmd, excuseInfo, excuseByUser} from './excuse'
 
 export const commands = {
   help: {
@@ -46,7 +46,12 @@ export const commands = {
   },
   excuses: {
     action: excuseCmd,
-    info: 'Retourne la liste des excuses: <!excuses page n°> pour obtenir les autres pages',
+    info:
+      'Retourne la liste des excuses: <!excuses page n°> pour obtenir les autres pages',
+  },
+  excuseuser: {
+    action: excuseByUser,
+    info: 'Retourne la liste des excuses de @pseudo: <!excuseuser @pseudo>',
   },
   gif: {
     action: async ({msg, params}) =>
