@@ -46,7 +46,7 @@ export const commands = {
   },
   excuses: {
     action: excuseCmd,
-    info: 'Retourne la liste des excuses',
+    info: 'Retourne la liste des excuses: <!excuses page n°> pour obtenir les autres pages',
   },
   gif: {
     action: async ({msg, params}) =>

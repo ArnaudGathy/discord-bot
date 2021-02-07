@@ -1,6 +1,6 @@
 const Discord = require('discord.js')
 import auth from '../constants/auth'
-import { channels } from '../constants/channels'
+import {channels} from '../constants/channels'
 import axios from 'axios'
 
 const excusePrefix = '!excuse'
@@ -27,6 +27,29 @@ function formatExcuses(body) {
   return message
 }
 
+// formatFooter formats the footer of embed message with pagination metadata
+function formatFooter(respMessage, paginationMeta) {
+  // Don't print anything if there is no other pages
+  if (paginationMeta.total_pages === 1) {
+    return respMessage
+  }
+
+  let nextPageMessage
+  // Last page
+  if (paginationMeta.current_page === paginationMeta.total_pages) {
+    nextPageMessage = ` - utilise la commande <!excuses page ${paginationMeta.prev_page}> pour la page précédente`
+  }
+  // There is a next page available
+  if (paginationMeta.current_page < paginationMeta.total_pages) {
+    nextPageMessage = ` - utilise la commande <!excuses page ${paginationMeta.next_page}> pour la page suivante`
+  }
+
+  respMessage.setFooter(
+    `Page ${paginationMeta.current_page}/${paginationMeta.total_pages}${nextPageMessage}`
+  )
+  return respMessage
+}
+
 function logError(contextName, error, client, msg) {
   const botChan = client.channels.get(channels.test_bot)
 
@@ -44,8 +67,20 @@ function logError(contextName, error, client, msg) {
   botChan.send(embedMessage)
 }
 
-function getExcuseCmd(msg, client) {
-  const requestURL = msg.guild.id
+function getExcuseCmd(msg, client, excuseContent) {
+  let requestURL = msg.guild.id
+
+  excuseContent = excuseContent.toLowerCase().trim()
+  if (excuseContent !== '') {
+    const usage = `C'est soit \`!excuses\` soit \`!excuses page <n° de la page>\``
+    const args = excuseContent.split(/\s+/)
+
+    // Check if command is formatted as `page <number>`
+    if (args[0] !== 'page' || (args[0] === 'page' && isNaN(args[1]))) {
+      return msg.channel.send(usage)
+    }
+    requestURL += `?page=${args[1]}`
+  }
 
   ;(async () => {
     try {
@@ -55,13 +90,28 @@ function getExcuseCmd(msg, client) {
         headers,
       })
 
-      console.log('Get: resp status', response.status)
-      console.log('Get: resp body', response.data)
+      console.log(response.data)
+      if (
+        response.data != null &&
+        response.data.excuses != null &&
+        response.data.excuses.length > 0
+      ) {
+        let respMessage = formatExcuses(response.data.excuses)
 
-      if (response.data != null && response.data.length > 0) {
-        return msg.channel.send(formatExcuses(response.data))
+        if (response.data.meta != null) {
+          respMessage = formatFooter(respMessage, response.data.meta)
+        }
+        return msg.channel.send(respMessage)
       }
-      msg.channel.send(
+      if (response.data.meta != null) {
+        const paginationMeta = response.data.meta
+        if (paginationMeta.current_page > paginationMeta.total_pages) {
+          return msg.channel.send(
+            `La page demandée est au-délà du nombre max de page (${paginationMeta.total_pages})`
+          )
+        }
+      }
+      return msg.channel.send(
         `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseInfo}\``
       )
     } catch (error) {
@@ -112,14 +162,12 @@ function addExcuse(msg, client, excuseContent) {
 
   ;(async () => {
     try {
-      const response = await axios({
+      await axios({
         method: 'post',
         url: `${baseUrl}/${requestURL}`,
         data: formBody,
         headers,
       })
-      console.log('resp status', response.status)
-      console.log('resp body', response.data)
 
       return msg.channel.send('Excuse ajoutée :+1:')
     } catch (error) {
@@ -132,25 +180,24 @@ function addExcuse(msg, client, excuseContent) {
 }
 
 function getRandomExcuse(msg, client) {
-  const requestURL = msg.guild.id;
+  const requestURL = msg.guild.id
 
-  (async () => {
+  ;(async () => {
     try {
       const response = await axios({
         method: 'get',
-        url: `${baseUrl}/${requestURL}`,
+        url: `${baseUrl}/${requestURL}/random`,
         headers,
       })
 
-      if (response.data != null && response.data.length > 0) {
-        const rdmExcusePos = Math.floor(Math.random() * response.data.length + 1)
-        const excuse = response.data[rdmExcusePos - 1]
+      if (response.data != null) {
+        const excuse = response.data
         const message = new Discord.RichEmbed()
           .setColor('#0099ff')
-          .setTitle("Random excuse")
+          .setTitle('Random excuse')
 
         message.addField(
-          `Excuse N°${rdmExcusePos}`,
+          `Excuse N°${response.data.id}`,
           `<@${excuse.author.id}>: ${excuse.content}`
         )
         return msg.channel.send(message)
@@ -172,14 +219,17 @@ function getRandomExcuse(msg, client) {
   })()
 }
 
-export const excuseCmd = ({ msg, client }) => {
+export const excuseCmd = ({msg, client}) => {
   const msgContent = msg.content.trim()
   const excuseContent = msgContent.slice(excusePrefix.length)
 
-  // Case of !excuse without arguments or !excuses, hence list all excuses
-  // if !excuses is used argument are ignored
-  if (excuseContent.trim() === '' || excuseContent.startsWith('s')) {
-    return getExcuseCmd(msg, client)
+  // Case of !excuse without arguments, hence list all excuses
+  if (excuseContent.trim() === '') {
+    return getExcuseCmd(msg, client, excuseContent)
+  }
+  // Case of !excuses, hence list all excuses
+  if (excuseContent.startsWith('s')) {
+    return getExcuseCmd(msg, client, excuseContent.slice(1))
   }
   if (excuseContent.trim() === 'random') {
     return getRandomExcuse(msg, client)
@@ -189,5 +239,6 @@ export const excuseCmd = ({ msg, client }) => {
 }
 
 export const excuseInfo =
-  excusePrefix + ` <contenu_de_l'excuse> <pseudo_de_l'auteur>
+  excusePrefix +
+  ` <contenu_de_l'excuse> <pseudo_de_l'auteur>
 * !excuse random - retourne une excuse random parmi la liste des excuses`
