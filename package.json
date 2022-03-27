@@ -14,7 +14,7 @@
     "pm2:setup": "pm2 start build/index.js --name \"discord-bot\" && pm2 stop discord-bot"
   },
   "dependencies": {
-    "axios": "0.21.1",
+    "axios": "0.26.1",
     "discord.js": "^11.4.2",
     "dotenv": "6.0.0",
     "got": "^9.6.0",
