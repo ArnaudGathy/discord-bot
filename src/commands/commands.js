@@ -3,7 +3,6 @@ import {type} from 'os'
 import {getRandomGif} from '../utils/giphy'
 import {filter} from 'ramda'
 import {channels} from '../constants/channels'
-import {excuseCmd, excuseInfo, excuseByUser} from './excuse'
 
 export const commands = {
   help: {
@@ -37,21 +36,6 @@ export const commands = {
   hello: {
     action: ({msg}) => msg.channel.send(`Kikoo ${msg.author} ( ͡° ͜ʖ ͡°)`),
     info: 'Dites bonjour au bot !',
-  },
-  excuse: {
-    action: excuseCmd,
-    info:
-      'Retourne la liste des excuses ou ajoute une excuse au codexcuse: ' +
-      excuseInfo,
-  },
-  excuses: {
-    action: excuseCmd,
-    info:
-      'Retourne la liste des excuses: <!excuses page n°> pour obtenir les autres pages',
-  },
-  excuseuser: {
-    action: excuseByUser,
-    info: 'Retourne la liste des excuses de @pseudo: <!excuseuser @pseudo>',
   },
   gif: {
     action: async ({msg, params}) =>

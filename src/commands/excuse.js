@@ -3,7 +3,7 @@ import auth from '../constants/auth'
 import {channels} from '../constants/channels'
 import axios from 'axios'
 
-const excusePrefix = '!excuse'
+const excusePrefix = '/excuse'
 const username = auth.apiStorage.username
 const password = auth.apiStorage.password
 const baseUrl = `${auth.apiStorage.baseURL}/api/codexcuses`
@@ -37,14 +37,14 @@ function formatFooter(respMessage, paginationMeta) {
   let nextPageMessage
   // Last page
   if (paginationMeta.current_page === paginationMeta.total_pages) {
-    nextPageMessage = ` - utilise la commande <!excuses page ${paginationMeta.prev_page}> pour la page précédente`
+    nextPageMessage = ` - utilise la commande </excuses page ${paginationMeta.prev_page}> pour la page précédente`
   }
   // There is a next page available
   if (paginationMeta.current_page < paginationMeta.total_pages) {
-    nextPageMessage = ` - utilise la commande <!excuses page ${paginationMeta.next_page}> pour la page suivante`
+    nextPageMessage = ` - utilise la commande </excuses page ${paginationMeta.next_page}> pour la page suivante`
   }
   respMessage.setFooter({
-    text: `Page ${paginationMeta.current_page}/${paginationMeta.total_pages}${nextPageMessage}`
+    text: `Page ${paginationMeta.current_page}/${paginationMeta.total_pages}${nextPageMessage}`,
   })
   return respMessage
 }
@@ -63,23 +63,11 @@ function logError(contextName, error, client, msg) {
     .addField('Concerned command', msg.content)
     .setDescription(error)
 
-  botChan.send({ embeds: [embedMessage] })
+  botChan.send({embeds: [embedMessage]})
 }
 
-function getExcuseCmd(msg, client, excuseContent) {
+export const getExcuseCmd = (msg) => {
   let requestURL = msg.guild.id
-
-  excuseContent = excuseContent.toLowerCase().trim()
-  if (excuseContent !== '') {
-    const usage = `C'est soit \`!excuses\` soit \`!excuses page <n° de la page>\``
-    const args = excuseContent.split(/\s+/)
-
-    // Check if command is formatted as `page <number>`
-    if (args[0] !== 'page' || (args[0] === 'page' && isNaN(args[1]))) {
-      return msg.channel.send(usage)
-    }
-    requestURL += `?page=${args[1]}`
-  }
 
   ;(async () => {
     try {
@@ -109,11 +97,12 @@ function getExcuseCmd(msg, client, excuseContent) {
           )
         }
       }
-      return msg.channel.send(
-        `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseInfo}\``
+      msg.channel.send(
+        `Il n'y a pas encore d'excuse. Utilise la commande: /excuse`
       )
+      return;
     } catch (error) {
-      logError('Codexcuses', `Error during GET request: ${error} `, client, msg)
+      logError('Codexcuses', `Error during GET request: ${error} `, msg.client, msg)
       msg.channel.send(
         "Désolé, petit problème interne, j'en ai notifié mes propriétaires"
       )
@@ -121,25 +110,25 @@ function getExcuseCmd(msg, client, excuseContent) {
   })()
 }
 
-function addExcuse(msg, client, excuseContent) {
+export const addExcuse = (msg, excuseContent, author) => {
   const requestURL = msg.guild.id
 
-  // Even if no one is mentioned `msg.mentions.users` is not null
-  if (msg.mentions.users != null) {
-    if (msg.mentions.users.size > 1) {
-      return msg.channel.send(`Il ne faut qu'un seul auteur`)
-    }
-    if (msg.mentions.users.size === 0) {
-      return msg.channel.send(
-        `Il faut de la délation, tu dois mentionner l'auteur (avec une mention discord @pseudo) !`
-      )
-    }
-  }
+  // // Even if no one is mentioned `msg.mentions.users` is not null
+  // if (msg.mentions.users != null) {
+  //   if (msg.mentions.users.size > 1) {
+  //     return msg.channel.send(`Il ne faut qu'un seul auteur`)
+  //   }
+  //   if (msg.mentions.users.size === 0) {
+  //     return msg.channel.send(
+  //       `Il faut de la délation, tu dois mentionner l'auteur (avec une mention discord @pseudo) !`
+  //     )
+  //   }
+  // }
 
   // As mentions in message is formatted like <@!user_id>
   // We remove the mention from message content.
-  excuseContent = excuseContent.replace(/<@!?(\d+)>/g, '')
-  const author = msg.mentions.users.first()
+  // excuseContent = excuseContent.replace(/<@!?(\d+)>/g, '')
+  // const author = msg.mentions.users.first()
   const formBody = {
     title: 'Excuse', // Mandatory field for the API, but useless in our cases.
     content: excuseContent,
@@ -164,7 +153,7 @@ function addExcuse(msg, client, excuseContent) {
 
       return msg.channel.send('Excuse ajoutée :+1:')
     } catch (error) {
-      logError('Codexcuse', `Error during the POST: ${error} `, client, msg)
+      logError('Codexcuse', `Error during the POST: ${error} `, msg.client, msg)
       msg.channel.send(
         "Désolé, petit problème interne, j'en ai notifié mes propriétaires"
       )
@@ -172,7 +161,7 @@ function addExcuse(msg, client, excuseContent) {
   })()
 }
 
-function getRandomExcuse(msg, client) {
+export const getRandomExcuse = (msg) => {
   const requestURL = msg.guild.id
 
   ;(async () => {
@@ -193,7 +182,7 @@ function getRandomExcuse(msg, client) {
           `Excuse ID: ${response.data.id}`,
           `<@${excuse.author.id}>: ${excuse.content}`
         )
-    return msg.channel.send({embeds: [message]})
+        return msg.channel.send({embeds: [message]})
       }
       msg.channel.send(
         `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseInfo}\``
@@ -202,7 +191,7 @@ function getRandomExcuse(msg, client) {
       logError(
         'Codexcuse random',
         `Error during GET request: ${error} `,
-        client,
+        msg.client,
         msg
       )
       msg.channel.send(
@@ -212,8 +201,8 @@ function getRandomExcuse(msg, client) {
   })()
 }
 
-function getExcuseByUser(msg, client, authorID) {
-  const requestURL = `${msg.guild.id}?user=${authorID}`
+export const getExcuseByUser = (msg, authorId) => {
+  const requestURL = `${msg.guild.id}?user=${authorId}`
 
   ;(async () => {
     try {
@@ -232,17 +221,18 @@ function getExcuseByUser(msg, client, authorID) {
         if (response.data.meta != null) {
           respMessage = formatFooter(respMessage, response.data.meta)
         }
-    return msg.channel.send({embeds: [respMessage]})
+        return msg.channel.send({embeds: [respMessage]})
       }
 
       msg.channel.send(
         `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseInfo}\``
       )
+      return
     } catch (error) {
       logError(
         'Codexcuse by user',
         `Error during GET request: ${error} `,
-        client,
+        msg.client,
         msg
       )
       msg.channel.send(
@@ -252,43 +242,7 @@ function getExcuseByUser(msg, client, authorID) {
   })()
 }
 
-export const excuseCmd = ({msg, client}) => {
-  const msgContent = msg.content.trim()
-  const excuseContent = msgContent.slice(excusePrefix.length)
-
-  // Case of !excuse without arguments, hence list all excuses
-  if (excuseContent.trim() === '') {
-    return getExcuseCmd(msg, client, excuseContent)
-  }
-  // Case of !excuses, hence list all excuses
-  if (excuseContent.startsWith('s')) {
-    return getExcuseCmd(msg, client, excuseContent.slice(1))
-  }
-  if (excuseContent.trim() === 'random') {
-    return getRandomExcuse(msg, client)
-  }
-  if (excuseContent.trim().startsWith('user') === 'user') {
-    return getExcuseByUser(msg, client, excuseContent)
-  }
-
-  return addExcuse(msg, client, excuseContent)
-}
-
-export const excuseByUser = ({msg, client}) => {
-  // Even if no one is mentioned `msg.mentions.users` is not null
-  if (msg.mentions.users != null) {
-    if (msg.mentions.users.size > 1) {
-      return msg.channel.send("Il ne faut qu'un seul auteur")
-    }
-    if (msg.mentions.users.size === 0) {
-      return msg.channel.send("La commande c'est: `!excuseuser @pseudo`")
-    }
-  }
-
-  return getExcuseByUser(msg, client, msg.mentions.users.first().id)
-}
-
 export const excuseInfo =
   excusePrefix +
-  ` <contenu_de_l'excuse> <pseudo_de_l'auteur>
-* !excuse random - retourne une excuse random parmi la liste des excuses`
+  ` <pseudo_de_l'auteur> <contenu_de_l'excuse>
+* /excuse random - retourne une excuse random parmi la liste des excuses`
