@@ -102,7 +102,7 @@ export const commands = {
         msg.author,
         true
       )
-      client.channels.get(channels.jdrChannel).send(message)
+      client.channels.cache.get(channels.jdrChannel).send(message)
     },
   },
   mjtriche: {
@@ -119,7 +119,7 @@ export const commands = {
         msg.author,
         true
       )
-      client.channels.get(channels.jdrChannel).send(message)
+      client.channels.cache.get(channels.jdrChannel).send(message)
     },
   },
 }

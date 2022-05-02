@@ -14,7 +14,7 @@ const headers = {
 }
 
 function formatExcuses(body) {
-  const message = new Discord.RichEmbed()
+  const message = new Discord.MessageEmbed()
     .setColor('#0099ff')
     .setTitle("Liste d'excuses:")
 
@@ -43,18 +43,17 @@ function formatFooter(respMessage, paginationMeta) {
   if (paginationMeta.current_page < paginationMeta.total_pages) {
     nextPageMessage = ` - utilise la commande <!excuses page ${paginationMeta.next_page}> pour la page suivante`
   }
-
-  respMessage.setFooter(
-    `Page ${paginationMeta.current_page}/${paginationMeta.total_pages}${nextPageMessage}`
-  )
+  respMessage.setFooter({
+    text: `Page ${paginationMeta.current_page}/${paginationMeta.total_pages}${nextPageMessage}`
+  })
   return respMessage
 }
 
 function logError(contextName, error, client, msg) {
-  const botChan = client.channels.get(channels.test_bot)
+  const botChan = client.channels.cache.get(channels.test_bot)
 
   console.error('Fail to handle codexcuse:', error)
-  const embedMessage = new Discord.RichEmbed()
+  const embedMessage = new Discord.MessageEmbed()
     .setColor('#0099ff')
     .setTitle('Error during ' + contextName)
     .addField(
@@ -64,7 +63,7 @@ function logError(contextName, error, client, msg) {
     .addField('Concerned command', msg.content)
     .setDescription(error)
 
-  botChan.send(embedMessage)
+  botChan.send({ embeds: [embedMessage] })
 }
 
 function getExcuseCmd(msg, client, excuseContent) {
@@ -100,7 +99,7 @@ function getExcuseCmd(msg, client, excuseContent) {
         if (response.data.meta != null) {
           respMessage = formatFooter(respMessage, response.data.meta)
         }
-        return msg.channel.send(respMessage)
+        return msg.channel.send({embeds: [respMessage]})
       }
       if (response.data.meta != null) {
         const paginationMeta = response.data.meta
@@ -186,7 +185,7 @@ function getRandomExcuse(msg, client) {
 
       if (response.data != null) {
         const excuse = response.data
-        const message = new Discord.RichEmbed()
+        const message = new Discord.MessageEmbed()
           .setColor('#0099ff')
           .setTitle('Random excuse')
 
@@ -194,7 +193,7 @@ function getRandomExcuse(msg, client) {
           `Excuse ID: ${response.data.id}`,
           `<@${excuse.author.id}>: ${excuse.content}`
         )
-        return msg.channel.send(message)
+    return msg.channel.send({embeds: [message]})
       }
       msg.channel.send(
         `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseInfo}\``
@@ -233,7 +232,7 @@ function getExcuseByUser(msg, client, authorID) {
         if (response.data.meta != null) {
           respMessage = formatFooter(respMessage, response.data.meta)
         }
-        return msg.channel.send(respMessage)
+    return msg.channel.send({embeds: [respMessage]})
       }
 
       msg.channel.send(
