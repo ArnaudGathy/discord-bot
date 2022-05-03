@@ -12,17 +12,21 @@ const headers = {
     'base64'
   )}`,
 }
+const excuseAddInfo =
+  excusePrefix + "add cible:<pseudo_de_l'auteur> contenu:<contenu_de_l'excuse>"
 
-function formatExcuses(body) {
+  function formatExcuses(body) {
   const message = new Discord.MessageEmbed()
     .setColor('#0099ff')
     .setTitle("Liste d'excuses:")
 
   body.map((excuse, idx) => {
-    message.addField(
-      `Excuse #${idx + 1}`,
-      `<@${excuse.author.id}>: ${excuse.content}`
-    )
+    if (excuse.author != null && excuse.content != null) {
+      message.addField(
+        `Excuse #${idx + 1}`,
+        `<@${excuse.author.id}>: ${excuse.content}`
+      )
+    }
   })
   return message
 }
@@ -37,11 +41,11 @@ function formatFooter(respMessage, paginationMeta) {
   let nextPageMessage
   // Last page
   if (paginationMeta.current_page === paginationMeta.total_pages) {
-    nextPageMessage = ` - utilise la commande </excuses page ${paginationMeta.prev_page}> pour la page précédente`
+    nextPageMessage = ` - utilise la commande </excuse all page:${paginationMeta.prev_page}> pour la page précédente`
   }
   // There is a next page available
   if (paginationMeta.current_page < paginationMeta.total_pages) {
-    nextPageMessage = ` - utilise la commande </excuses page ${paginationMeta.next_page}> pour la page suivante`
+    nextPageMessage = ` - utilise la commande </excuse all page:${paginationMeta.next_page}> pour la page suivante`
   }
   respMessage.setFooter({
     text: `Page ${paginationMeta.current_page}/${paginationMeta.total_pages}${nextPageMessage}`,
@@ -60,14 +64,18 @@ function logError(contextName, error, client, msg) {
       'Happened on Channel',
       `'${msg.channel.name}' <#${msg.channel.id}>`
     )
-    .addField('Concerned command', msg.content)
+    .addField('Concerned command', msg.toString())
     .setDescription(error)
 
   botChan.send({embeds: [embedMessage]})
 }
 
-export const getExcuseCmd = (msg) => {
+export const getExcuseCmd = (msg, pageNum = null) => {
   let requestURL = msg.guild.id
+
+  if (pageNum != null) {
+    requestURL += `?page=${pageNum}`
+  }
 
   ;(async () => {
     try {
@@ -87,43 +95,36 @@ export const getExcuseCmd = (msg) => {
         if (response.data.meta != null) {
           respMessage = formatFooter(respMessage, response.data.meta)
         }
-        return msg.channel.send({embeds: [respMessage]})
+        return msg.editReply({embeds: [respMessage], ephemeral: false })
       }
       if (response.data.meta != null) {
         const paginationMeta = response.data.meta
         if (paginationMeta.current_page > paginationMeta.total_pages) {
-          return msg.channel.send(
-            `La page demandée est au-delà du nombre max de page (${paginationMeta.total_pages})`
-          )
+          return msg.editReply({
+            content: `La page demandée est au-delà du nombre max de page (${paginationMeta.total_pages})`,
+          })
         }
       }
-      msg.channel.send(
-        `Il n'y a pas encore d'excuse. Utilise la commande: /excuse`
-      )
+      msg.editReply({
+        content: `Il n'y a pas encore d'excuse. Utilise la commande: ${excuseAddInfo}`,
+      })
       return;
     } catch (error) {
-      logError('Codexcuses', `Error during GET request: ${error} `, msg.client, msg)
-      msg.channel.send(
-        "Désolé, petit problème interne, j'en ai notifié mes propriétaires"
+      logError(
+        'Codexcuses',
+        `Error during GET request: ${error} `,
+        msg.client,
+        msg
       )
+      msg.editReply({
+        content: "Désolé, petit problème interne, j'en ai notifié mes propriétaires",
+      })
     }
   })()
 }
 
 export const addExcuse = (msg, excuseContent, author) => {
   const requestURL = msg.guild.id
-
-  // // Even if no one is mentioned `msg.mentions.users` is not null
-  // if (msg.mentions.users != null) {
-  //   if (msg.mentions.users.size > 1) {
-  //     return msg.channel.send(`Il ne faut qu'un seul auteur`)
-  //   }
-  //   if (msg.mentions.users.size === 0) {
-  //     return msg.channel.send(
-  //       `Il faut de la délation, tu dois mentionner l'auteur (avec une mention discord @pseudo) !`
-  //     )
-  //   }
-  // }
 
   // As mentions in message is formatted like <@!user_id>
   // We remove the mention from message content.
@@ -137,8 +138,8 @@ export const addExcuse = (msg, excuseContent, author) => {
       username: `${author.username}#${author.discriminator} `,
     },
     reporter: {
-      id: msg.author.id,
-      username: `${msg.author.username}#${msg.author.discriminator} `,
+      id: msg.user.id,
+      username: `${msg.user.username}#${msg.user.discriminator} `,
     },
   }
 
@@ -151,12 +152,12 @@ export const addExcuse = (msg, excuseContent, author) => {
         headers,
       })
 
-      return msg.channel.send('Excuse ajoutée :+1:')
+      return msg.editReply({ content: 'Excuse ajoutée :+1:', components: [] });
     } catch (error) {
       logError('Codexcuse', `Error during the POST: ${error} `, msg.client, msg)
-      msg.channel.send(
-        "Désolé, petit problème interne, j'en ai notifié mes propriétaires"
-      )
+      msg.editReply({
+        content: "Désolé, petit problème interne, j'en ai notifié mes propriétaires",
+      })
     }
   })()
 }
@@ -182,11 +183,11 @@ export const getRandomExcuse = (msg) => {
           `Excuse ID: ${response.data.id}`,
           `<@${excuse.author.id}>: ${excuse.content}`
         )
-        return msg.channel.send({embeds: [message]})
+        return msg.editReply({embeds: [message]})
       }
-      msg.channel.send(
-        `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseInfo}\``
-      )
+      msg.editReply({
+        content: `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseAddInfo}\``,
+      })
     } catch (error) {
       logError(
         'Codexcuse random',
@@ -194,9 +195,9 @@ export const getRandomExcuse = (msg) => {
         msg.client,
         msg
       )
-      msg.channel.send(
-        "Désolé, petit problème interne, j'en ai notifié mes propriétaires"
-      )
+      msg.editReply({
+        content: "Désolé, petit problème interne, j'en ai notifié mes propriétaires",
+      })
     }
   })()
 }
@@ -221,12 +222,12 @@ export const getExcuseByUser = (msg, authorId) => {
         if (response.data.meta != null) {
           respMessage = formatFooter(respMessage, response.data.meta)
         }
-        return msg.channel.send({embeds: [respMessage]})
+        return msg.editReply({embeds: [respMessage]})
       }
 
-      msg.channel.send(
-        `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseInfo}\``
-      )
+      msg.editReply({
+        content: `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseAddInfo}\``,
+      })
       return
     } catch (error) {
       logError(
@@ -235,14 +236,9 @@ export const getExcuseByUser = (msg, authorId) => {
         msg.client,
         msg
       )
-      msg.channel.send(
-        "Désolé, petit problème interne, j'en ai notifié mes propriétaires"
-      )
+      msg.editReply({
+        content: "Désolé, petit problème interne, j'en ai notifié mes propriétaires",
+      })
     }
   })()
 }
-
-export const excuseInfo =
-  excusePrefix +
-  ` <pseudo_de_l'auteur> <contenu_de_l'excuse>
-* /excuse random - retourne une excuse random parmi la liste des excuses`

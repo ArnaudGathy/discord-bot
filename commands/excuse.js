@@ -3,19 +3,27 @@ import {getExcuseCmd, getExcuseByUser, addExcuse, getRandomExcuse} from '../src/
 
 // Following const are the name of option displayed to users
 const commandName = 'excuse'
+const subcommandAllOptionName = 'all'
 const subcommandUserOptionName = 'user'
 const subcommandAddOptionName = 'add'
+const subcommandRandomOptionName = 'random'
+const subcommandPageNumberOptionName = 'page_num'
 const targetOptionName = 'cible'
 const contentOptionName = 'contenu'
-const subcommandRandomOptionName = 'random'
 
 module.exports = {
-   //
-   // Command registration
-   //
-   data: new SlashCommandBuilder()
+  //
+  // Command registration
+  //
+  data: new SlashCommandBuilder()
     .setName(commandName)
-    .setDescription('Affiche toutes les excuses.')
+    .setDescription('Gère les excuses.')
+    .addSubcommand((subcommand) =>
+      subcommand
+        .setName(subcommandAllOptionName)
+        .setDescription('Affiche toutes les excuses.')
+        .addNumberOption(option => option.setName(subcommandPageNumberOptionName).setDescription('Le n° de la page')),
+    )
     .addSubcommand((subcommand) =>
       subcommand
         .setName(subcommandUserOptionName)
@@ -27,25 +35,29 @@ module.exports = {
         .setName(subcommandAddOptionName)
         .setDescription('Ajoute une nouvelle excuse')
         .addUserOption((option) => option.setName(targetOptionName).setDescription("Il faut de la délation, tu dois mentionner l'auteur").setRequired(true))
-        .addStringOption((option) => option.setName(contentOptionName).setDescription('Le contenu de l\'excuse'))
+        .addStringOption((option) => option.setName(contentOptionName).setDescription('Le contenu de l\'excuse').setRequired(true))
     )
     .addSubcommand((subcommand) =>
       subcommand
         .setName(subcommandRandomOptionName)
         .setDescription('Affiche une excuse random')
-   ),
+    ),
 
-   //
-   // Command execution
-   //
-   async execute(interaction) {
-    // await interaction.deferReply()
-    await interaction.reply('Inc')
+  //
+  // Command execution
+  //
+  async execute(interaction) {
+    await interaction.deferReply()
     const { options } = interaction
 
     let target;
     const subcommand = options.getSubcommand()
     switch (subcommand) {
+      case subcommandAllOptionName:
+        let pageNum = interaction.options.getNumber(subcommandPageNumberOptionName)
+        getExcuseCmd(interaction, pageNum)
+        break;
+
       case subcommandUserOptionName:
         target = interaction.options.getUser(targetOptionName)
         getExcuseByUser(interaction, target.id)
@@ -53,8 +65,8 @@ module.exports = {
 
       case subcommandAddOptionName:
         target = interaction.options.getUser(targetOptionName)
-        const content = interaction.options.getUser(contentOptionName)
-        addExcuse(interaction, content, target.id)
+        const content = interaction.options.getString(contentOptionName)
+        addExcuse(interaction, content, target)
         break;
 
       case subcommandRandomOptionName:
