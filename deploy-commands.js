@@ -5,7 +5,7 @@
 // It is mandatory to set the 'applications.commands' scope in the scopes section of the OAuth2
 // settings for the bot in the discord developer portal.
 
-// About the commands doc is here:
+// About the commands guide is here:
 // https://discordjs.guide/popular-topics/builders.html#commands
 
 const {REST} = require('@discordjs/rest')
