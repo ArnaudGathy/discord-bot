@@ -64,9 +64,12 @@ for (const file of commandFiles) {
 
 // Listen on slash command
 client.on('interactionCreate', async interaction => {
+  // Return in case of other bot interaction events
+  if (interaction.applicationId !== auth.discord.clientId) return;
+
 	if (!interaction.isCommand()) return;
 
-	const command = client.commands.get(interaction.commandName);
+  const command = client.commands.get(interaction.commandName);
 
 	if (!command) return;
 

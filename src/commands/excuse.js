@@ -1,4 +1,5 @@
 const Discord = require('discord.js')
+const { MessageActionRow, MessageButton } = require('discord.js');
 import auth from '../constants/auth'
 import {channels} from '../constants/channels'
 import axios from 'axios'
@@ -12,13 +13,134 @@ const headers = {
     'base64'
   )}`,
 }
-const excuseAddInfo =
-  excusePrefix + "add cible:<pseudo_de_l'auteur> contenu:<contenu_de_l'excuse>"
+const excuseAddInfo = excusePrefix + " add cible:<pseudo_de_l'auteur> contenu:<contenu_de_l'excuse>"
 
-  function formatExcuses(body) {
+// Defines the availability time of the pagination buttons (in milliseconds).
+// After this delay the pagination system for the concerned message won't be possible anymore.
+// Note that on each use (click) of pagination's buttons the timer is reset thanks to `resetTimer()`.
+const buttonTimeout = 15000
+
+// Global variables to handle pagination between request and handlers
+// There is a race condition possible if two (or more) messages need pagination
+// are call by the same time (during the `buttonTimeout` interval).
+let paginationPageMeta
+let paginationRespMessage
+
+export const getExcuseCmd = async (msg, pageNum = null, isPaginationCall = false) => {
+  let requestParam = msg.guild.id
+
+  if (pageNum != null) {
+    requestParam += `?page=${pageNum}`
+  }
+  const responseData = await fetchExcuses(requestParam, msg)
+
+  if (responseData == null || responseData.excuses == null || responseData.excuses.length <= 0) {
+    msg.editReply({ content: `Il n'y a pas encore d'excuse. Utilise la commande: ${excuseAddInfo}` })
+    return;
+  }
+
+  paginationRespMessage = formatExcuses(responseData.excuses)
+
+  // Don't format the footer and add buttons if there is no other pages or if there is no pagination metadata
+  if (responseData.meta == null || responseData.meta.total_pages === 1 || responseData.meta.total_pages === 0) {
+    await msg.editReply( {embeds: [paginationRespMessage], components: []})
+    return
+  }
+
+  paginationRespMessage = formatFooter(paginationRespMessage, responseData.meta)
+  let paginationButtons = new MessageActionRow()
+    .addComponents(new MessageButton().setCustomId('page_prev').setLabel('<').setStyle('PRIMARY'))
+    .addComponents(new MessageButton().setCustomId('page_next').setLabel('>').setStyle('PRIMARY'))
+  paginationPageMeta = responseData.meta
+
+  const paginationResponse = await msg.editReply({embeds: [paginationRespMessage], components: [paginationButtons]})
+  // We don't want to register handler anymore if it is already done
+  if (isPaginationCall) return
+  handlePagination(paginationResponse, msg)
+}
+
+export const addExcuse = (msg, excuseContent, author) => {
+  // As mentions in message is formatted like <@!user_id>
+  // We remove the mention from message content.
+  // excuseContent = excuseContent.replace(/<@!?(\d+)>/g, '')
+  // const author = msg.mentions.users.first()
+  const formBody = {
+    title: 'Excuse', // Mandatory field for the API, but useless in our cases.
+    content: excuseContent,
+    author: {
+      id: author.id,
+      username: `${author.username}#${author.discriminator} `,
+    },
+    reporter: {
+      id: msg.user.id,
+      username: `${msg.user.username}#${msg.user.discriminator} `,
+    },
+  }
+
+  const isSuccess = postExcuse(msg.guild.id, formBody, msg)
+  if (!isSuccess) return
+
+  return msg.editReply({content: 'Excuse ajoutée :+1:'})
+}
+
+export const getRandomExcuse = async (msg) => {
+  const responseData = await fetchExcuses(`${msg.guild.id}?random=1`, msg)
+
+  if (responseData == null) {
+    msg.editReply({
+      content: `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseAddInfo}\``,
+    })
+    return
+  }
+
+  const excuse = responseData
   const message = new Discord.MessageEmbed()
     .setColor('#0099ff')
-    .setTitle("Liste d'excuses:")
+    .setTitle('Random excuse')
+
+  message.addField(
+    `Excuse ID: ${responseData.id}`,
+    `<@${excuse.author.id}>: ${excuse.content}`
+  )
+  return msg.editReply({embeds: [message]})
+}
+
+export const getExcuseByUser = async (msg, authorId, isPaginationCall = false) => {
+  const responseData = await fetchExcuses(`${msg.guild.id}?user=${authorId}`, msg)
+
+  if (responseData == null || responseData.excuses == null || responseData.excuses.length <= 0) {
+    msg.editReply({ content: `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseAddInfo}\`` })
+    return
+  }
+
+  paginationRespMessage = formatExcuses(responseData.excuses)
+
+  // Don't format the footer and add buttons if there is no other pages or if there is no pagination metadata
+  if (responseData.meta == null || responseData.meta.total_pages === 1 || responseData.meta.total_pages === 0) {
+    await msg.editReply({embeds: [paginationRespMessage], components: []})
+    return
+  }
+
+  paginationRespMessage = formatFooter(paginationRespMessage, responseData.meta)
+  const paginationButtons = new MessageActionRow()
+    .addComponents(new MessageButton().setCustomId('page_prev').setLabel('<').setStyle('PRIMARY'))
+    .addComponents(new MessageButton().setCustomId('page_next').setLabel('>').setStyle('PRIMARY'))
+  paginationPageMeta = responseData.meta
+
+  const paginationResponse = await msg.editReply({embeds: [paginationRespMessage], components: [paginationButtons]})
+  // We don't want to register handler anymore if it is already done
+  if (isPaginationCall) return
+  handlePagination(paginationResponse, msg)
+}
+
+//
+// Tools
+//
+
+function formatExcuses(body) {
+  const message = new Discord.MessageEmbed()
+    .setColor('#0099ff')
+    .setTitle("Liste de #codexcuse")
 
   body.map((excuse, idx) => {
     if (excuse.author != null && excuse.content != null) {
@@ -38,17 +160,8 @@ function formatFooter(respMessage, paginationMeta) {
     return respMessage
   }
 
-  let nextPageMessage
-  // Last page
-  if (paginationMeta.current_page === paginationMeta.total_pages) {
-    nextPageMessage = ` - utilise la commande </excuse all page:${paginationMeta.prev_page}> pour la page précédente`
-  }
-  // There is a next page available
-  if (paginationMeta.current_page < paginationMeta.total_pages) {
-    nextPageMessage = ` - utilise la commande </excuse all page:${paginationMeta.next_page}> pour la page suivante`
-  }
   respMessage.setFooter({
-    text: `Page ${paginationMeta.current_page}/${paginationMeta.total_pages}${nextPageMessage}`,
+    text: `Page ${paginationMeta.current_page}/${paginationMeta.total_pages}`,
   })
   return respMessage
 }
@@ -65,180 +178,88 @@ function logError(contextName, error, client, msg) {
       `'${msg.channel.name}' <#${msg.channel.id}>`
     )
     .addField('Concerned command', msg.toString())
+    .addField('Command type', msg.type)
     .setDescription(error)
 
   botChan.send({embeds: [embedMessage]})
 }
 
-export const getExcuseCmd = (msg, pageNum = null) => {
-  let requestURL = msg.guild.id
+function handlePagination(excuseMessage, msg) {
+  if (!excuseMessage) return
 
-  if (pageNum != null) {
-    requestURL += `?page=${pageNum}`
+  ;(async () => {
+    // Only author of the command can use pagination
+    const filter = (i) => (i.customId === 'page_prev' || i.customId === 'page_next') && i.user.id === msg.user.id
+    const collector = await excuseMessage.createMessageComponentCollector({
+      filter,
+      time: buttonTimeout,
+    })
+
+    collector.on('collect', async (i) => {
+      await i.deferUpdate()
+      let pageNum = paginationPageMeta.current_page
+      switch (i.customId) {
+        case 'page_prev':
+          pageNum = pageNum > 1 ? --pageNum : paginationPageMeta.total_pages
+          break
+        case 'page_next':
+          pageNum = pageNum >= paginationPageMeta.total_pages ? 1 : ++pageNum
+          break
+        default:
+          break
+      }
+      console.debug('pagination system, pageNum: ', pageNum)
+      // Currently only `getExcuseCmd` has pagination system implemented, so
+      // no need to choose the correct function.
+      // This will be done by using:
+      // msg.options.getSubcommand()
+      await getExcuseCmd(i, pageNum, true)
+
+      // Reset buttonTimeout and restart to wait again
+      collector.resetTimer()
+    })
+
+    // Remove button from message after the timeout
+    collector.on('end', (_, reason) => {
+      if (reason !== 'messageDelete') {
+        excuseMessage.edit({
+          embeds: [paginationRespMessage],
+          components: [],
+        })
+      }
+    })
+  })()
+}
+
+async function postExcuse(requestParam, formBody, msg) {
+  try {
+    await axios({
+      method: 'post',
+      url: `${baseUrl}/${requestParam}`,
+      data: formBody,
+      headers,
+    })
+    return true;
+  } catch (error) {
+    logError('Codexcuse', `Error during POST ${baseUrl}/${requestParam}: ${error} `, msg.client, msg)
+    msg.editReply({
+      content: "Désolé, petit problème interne, j'en ai notifié mes propriétaires",
+    })
+    return false
   }
-
-  ;(async () => {
-    try {
-      const response = await axios({
-        method: 'get',
-        url: `${baseUrl}/${requestURL}`,
-        headers,
-      })
-
-      if (
-        response.data != null &&
-        response.data.excuses != null &&
-        response.data.excuses.length > 0
-      ) {
-        let respMessage = formatExcuses(response.data.excuses)
-
-        if (response.data.meta != null) {
-          respMessage = formatFooter(respMessage, response.data.meta)
-        }
-        return msg.editReply({embeds: [respMessage], ephemeral: false })
-      }
-      if (response.data.meta != null) {
-        const paginationMeta = response.data.meta
-        if (paginationMeta.current_page > paginationMeta.total_pages) {
-          return msg.editReply({
-            content: `La page demandée est au-delà du nombre max de page (${paginationMeta.total_pages})`,
-          })
-        }
-      }
-      msg.editReply({
-        content: `Il n'y a pas encore d'excuse. Utilise la commande: ${excuseAddInfo}`,
-      })
-      return;
-    } catch (error) {
-      logError(
-        'Codexcuses',
-        `Error during GET request: ${error} `,
-        msg.client,
-        msg
-      )
-      msg.editReply({
-        content: "Désolé, petit problème interne, j'en ai notifié mes propriétaires",
-      })
-    }
-  })()
 }
 
-export const addExcuse = (msg, excuseContent, author) => {
-  const requestURL = msg.guild.id
-
-  // As mentions in message is formatted like <@!user_id>
-  // We remove the mention from message content.
-  // excuseContent = excuseContent.replace(/<@!?(\d+)>/g, '')
-  // const author = msg.mentions.users.first()
-  const formBody = {
-    title: 'Excuse', // Mandatory field for the API, but useless in our cases.
-    content: excuseContent,
-    author: {
-      id: author.id,
-      username: `${author.username}#${author.discriminator} `,
-    },
-    reporter: {
-      id: msg.user.id,
-      username: `${msg.user.username}#${msg.user.discriminator} `,
-    },
+async function fetchExcuses(requestParam, msg) {
+  try {
+    console.debug('fetchExcuses, parameters:', requestParam)
+    const response = await axios({
+      method: 'get',
+      url: `${baseUrl}/${requestParam}`,
+      headers,
+    })
+    return response.data
+  } catch (error) {
+    logError('Codexcuses', `Error during GET ${baseUrl}/${requestParam}: ${error} `, msg.client, msg)
+    msg.editReply({ content: "Désolé, petit problème interne, j'en ai notifié mes propriétaires" })
   }
-
-  ;(async () => {
-    try {
-      await axios({
-        method: 'post',
-        url: `${baseUrl}/${requestURL}`,
-        data: formBody,
-        headers,
-      })
-
-      return msg.editReply({ content: 'Excuse ajoutée :+1:', components: [] });
-    } catch (error) {
-      logError('Codexcuse', `Error during the POST: ${error} `, msg.client, msg)
-      msg.editReply({
-        content: "Désolé, petit problème interne, j'en ai notifié mes propriétaires",
-      })
-    }
-  })()
-}
-
-export const getRandomExcuse = (msg) => {
-  const requestURL = msg.guild.id
-
-  ;(async () => {
-    try {
-      const response = await axios({
-        method: 'get',
-        url: `${baseUrl}/${requestURL}?random=1`,
-        headers,
-      })
-
-      if (response.data != null) {
-        const excuse = response.data
-        const message = new Discord.MessageEmbed()
-          .setColor('#0099ff')
-          .setTitle('Random excuse')
-
-        message.addField(
-          `Excuse ID: ${response.data.id}`,
-          `<@${excuse.author.id}>: ${excuse.content}`
-        )
-        return msg.editReply({embeds: [message]})
-      }
-      msg.editReply({
-        content: `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseAddInfo}\``,
-      })
-    } catch (error) {
-      logError(
-        'Codexcuse random',
-        `Error during GET request: ${error} `,
-        msg.client,
-        msg
-      )
-      msg.editReply({
-        content: "Désolé, petit problème interne, j'en ai notifié mes propriétaires",
-      })
-    }
-  })()
-}
-
-export const getExcuseByUser = (msg, authorId) => {
-  const requestURL = `${msg.guild.id}?user=${authorId}`
-
-  ;(async () => {
-    try {
-      const response = await axios({
-        method: 'get',
-        url: `${baseUrl}/${requestURL}`,
-        headers,
-      })
-      if (
-        response.data != null &&
-        response.data.excuses != null &&
-        response.data.excuses.length > 0
-      ) {
-        let respMessage = formatExcuses(response.data.excuses)
-
-        if (response.data.meta != null) {
-          respMessage = formatFooter(respMessage, response.data.meta)
-        }
-        return msg.editReply({embeds: [respMessage]})
-      }
-
-      msg.editReply({
-        content: `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseAddInfo}\``,
-      })
-      return
-    } catch (error) {
-      logError(
-        'Codexcuse by user',
-        `Error during GET request: ${error} `,
-        msg.client,
-        msg
-      )
-      msg.editReply({
-        content: "Désolé, petit problème interne, j'en ai notifié mes propriétaires",
-      })
-    }
-  })()
 }
