@@ -47,7 +47,7 @@ const sendMessage = (
   const printableSpawnDate = formatDate(timer)
   const printableNextSpawnDate = formatDate(timer.add(3, 'h').add(20, 'm'))
 
-  const message = new Discord.RichEmbed()
+  const message = new Discord.MessageEmbed()
     .setColor('#0099ff')
     .setTitle(name)
     .setDescription(`${loot}\nPop dans **10 minutes (${printableSpawnDate})**`)
@@ -63,7 +63,7 @@ const sendMessage = (
 
   client.channels
     .get(channels.spawnRareChannel)
-    .send(message)
+    .send({embeds: [message]})
     .then(message => message.pin())
 }
 

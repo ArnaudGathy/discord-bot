@@ -3,6 +3,10 @@
     "discord": "discord_token",
     "giphy": "giphy_token"
   },
+  "discord": {
+    "guildId": "Discord server ID",
+    "clientId": "Bot client Id (from https://discord.com/developers/applications)"
+  },
   "apiStorage": {
     "username": "username",
     "password": "password",
