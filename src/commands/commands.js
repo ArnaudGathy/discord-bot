@@ -1,8 +1,8 @@
-import info from '../../package.json'
-import {type} from 'os'
-import {getRandomGif} from '../utils/giphy'
-import {filter} from 'ramda'
-import {channels} from '../constants/channels'
+const info = require('../../package.json')
+const {type} = require('os')
+const {getRandomGif} = require('../utils/giphy')
+const {filter} = require('ramda')
+const {channels} = require('../constants/channels')
 
 export const commands = {
   help: {

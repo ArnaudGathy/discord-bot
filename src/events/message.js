@@ -1,5 +1,5 @@
-import {isCommand, getContent} from '../utils/messageUtils'
-import {commands, fallback} from '../commands/commands'
+const {isCommand, getContent} = require('../utils/messageUtils')
+const {commands, fallback} = require('../commands/commands')
 
 export const messageHandler = (msg, client) => {
   if (isCommand(msg.content)) {

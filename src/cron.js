@@ -1,5 +1,5 @@
-import moment from 'moment-timezone'
-import {channels} from './constants/channels'
+const moment = require('moment-timezone')
+const {channels} = require('./constants/channels')
 const Discord = require('discord.js')
 
 // Get ref_date from wowhead link of each mob

@@ -1,8 +1,8 @@
 const Discord = require('discord.js')
 const { MessageActionRow, MessageButton } = require('discord.js');
-import auth from '../constants/auth'
-import {channels} from '../constants/channels'
-import axios from 'axios'
+const auth = require('../constants/auth')
+const {channels} = require('../constants/channels')
+const axios = require('axios')
 
 const excusePrefix = '/excuse'
 const username = auth.apiStorage.username
@@ -26,111 +26,216 @@ const buttonTimeout = 15000
 let paginationPageMeta
 let paginationRespMessage
 
-export const getExcuseCmd = async (msg, pageNum = null, isPaginationCall = false) => {
-  let requestParam = msg.guild.id
+module.exports = {
+  getExcuseCmd: async (msg, pageNum = null, isPaginationCall = false) => {
+    let requestParam = msg.guild.id
 
-  if (pageNum != null) {
-    requestParam += `?page=${pageNum}`
-  }
-  const responseData = await fetchExcuses(requestParam, msg)
+    if (pageNum != null) {
+      requestParam += `?page=${pageNum}`
+    }
+    const responseData = await fetchExcuses(requestParam, msg)
 
-  if (responseData == null || responseData.excuses == null || responseData.excuses.length <= 0) {
-    msg.editReply({ content: `Il n'y a pas encore d'excuse. Utilise la commande: ${excuseAddInfo}` })
-    return;
-  }
+    if (
+      responseData == null ||
+      responseData.excuses == null ||
+      responseData.excuses.length <= 0
+    ) {
+      msg.editReply({
+        content: `Il n'y a pas encore d'excuse. Utilise la commande: ${excuseAddInfo}`,
+      })
+      return
+    }
 
-  paginationRespMessage = formatExcuses(responseData.excuses)
+    paginationRespMessage = formatExcuses(responseData.excuses)
 
-  // Don't format the footer and add buttons if there is no other pages or if there is no pagination metadata
-  if (responseData.meta == null || responseData.meta.total_pages === 1 || responseData.meta.total_pages === 0) {
-    await msg.editReply( {embeds: [paginationRespMessage], components: []})
-    return
-  }
+    // Don't format the footer and add buttons if there is no other pages or if there is no pagination metadata
+    if (
+      responseData.meta == null ||
+      responseData.meta.total_pages === 1 ||
+      responseData.meta.total_pages === 0
+    ) {
+      await msg.editReply({embeds: [paginationRespMessage], components: []})
+      return
+    }
 
-  paginationRespMessage = formatFooter(paginationRespMessage, responseData.meta)
-  let paginationButtons = new MessageActionRow()
-    .addComponents(new MessageButton().setCustomId('page_prev').setLabel('<').setStyle('PRIMARY'))
-    .addComponents(new MessageButton().setCustomId('page_next').setLabel('>').setStyle('PRIMARY'))
-  paginationPageMeta = responseData.meta
+    paginationRespMessage = formatFooter(
+      paginationRespMessage,
+      responseData.meta
+    )
+    let paginationButtons = new MessageActionRow()
+      .addComponents(
+        new MessageButton()
+          .setCustomId('page_prev')
+          .setLabel('<')
+          .setStyle('PRIMARY')
+      )
+      .addComponents(
+        new MessageButton()
+          .setCustomId('page_next')
+          .setLabel('>')
+          .setStyle('PRIMARY')
+      )
+    paginationPageMeta = responseData.meta
 
-  const paginationResponse = await msg.editReply({embeds: [paginationRespMessage], components: [paginationButtons]})
-  // We don't want to register handler anymore if it is already done
-  if (isPaginationCall) return
-  handlePagination(paginationResponse, msg)
-}
-
-export const addExcuse = (msg, excuseContent, author) => {
-  // As mentions in message is formatted like <@!user_id>
-  // We remove the mention from message content.
-  // excuseContent = excuseContent.replace(/<@!?(\d+)>/g, '')
-  // const author = msg.mentions.users.first()
-  const formBody = {
-    title: 'Excuse', // Mandatory field for the API, but useless in our cases.
-    content: excuseContent,
-    author: {
-      id: author.id,
-      username: `${author.username}#${author.discriminator} `,
-    },
-    reporter: {
-      id: msg.user.id,
-      username: `${msg.user.username}#${msg.user.discriminator} `,
-    },
-  }
-
-  const isSuccess = postExcuse(msg.guild.id, formBody, msg)
-  if (!isSuccess) return
-
-  return msg.editReply({content: 'Excuse ajoutée :+1:'})
-}
-
-export const getRandomExcuse = async (msg) => {
-  const responseData = await fetchExcuses(`${msg.guild.id}?random=1`, msg)
-
-  if (responseData == null) {
-    msg.editReply({
-      content: `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseAddInfo}\``,
+    const paginationResponse = await msg.editReply({
+      embeds: [paginationRespMessage],
+      components: [paginationButtons],
     })
-    return
-  }
+    // We don't want to register handler anymore if it is already done
+    if (isPaginationCall) return
+    module.exports.handlePagination(paginationResponse, msg)
+  },
 
-  const excuse = responseData
-  const message = new Discord.MessageEmbed()
-    .setColor('#0099ff')
-    .setTitle('Random excuse')
+  addExcuse: async (msg, excuseContent, author) => {
+    // As mentions in message is formatted like <@!user_id>
+    // We remove the mention from message content.
+    // excuseContent = excuseContent.replace(/<@!?(\d+)>/g, '')
+    // const author = msg.mentions.users.first()
+    const formBody = {
+      title: 'Excuse', // Mandatory field for the API, but useless in our cases.
+      content: excuseContent,
+      author: {
+        id: author.id,
+        username: `${author.username}#${author.discriminator} `,
+      },
+      reporter: {
+        id: msg.user.id,
+        username: `${msg.user.username}#${msg.user.discriminator} `,
+      },
+    }
 
-  message.addField(
-    `Excuse ID: ${responseData.id}`,
-    `<@${excuse.author.id}>: ${excuse.content}`
-  )
-  return msg.editReply({embeds: [message]})
-}
+    const isSuccess = await postExcuse(msg.guild.id, formBody, msg)
+    if (!isSuccess) return
 
-export const getExcuseByUser = async (msg, authorId, isPaginationCall = false) => {
-  const responseData = await fetchExcuses(`${msg.guild.id}?user=${authorId}`, msg)
+    return msg.editReply({content: 'Excuse ajoutée :+1:'})
+  },
 
-  if (responseData == null || responseData.excuses == null || responseData.excuses.length <= 0) {
-    msg.editReply({ content: `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseAddInfo}\`` })
-    return
-  }
+  getRandomExcuse: async (msg) => {
+    const responseData = await fetchExcuses(`${msg.guild.id}?random=1`, msg)
 
-  paginationRespMessage = formatExcuses(responseData.excuses)
+    if (responseData == null) {
+      msg.editReply({
+        content: `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseAddInfo}\``,
+      })
+      return
+    }
 
-  // Don't format the footer and add buttons if there is no other pages or if there is no pagination metadata
-  if (responseData.meta == null || responseData.meta.total_pages === 1 || responseData.meta.total_pages === 0) {
-    await msg.editReply({embeds: [paginationRespMessage], components: []})
-    return
-  }
+    const excuse = responseData
+    const message = new Discord.MessageEmbed()
+      .setColor('#0099ff')
+      .setTitle('Random excuse')
 
-  paginationRespMessage = formatFooter(paginationRespMessage, responseData.meta)
-  const paginationButtons = new MessageActionRow()
-    .addComponents(new MessageButton().setCustomId('page_prev').setLabel('<').setStyle('PRIMARY'))
-    .addComponents(new MessageButton().setCustomId('page_next').setLabel('>').setStyle('PRIMARY'))
-  paginationPageMeta = responseData.meta
+    message.addField(
+      `Excuse ID: ${responseData.id}`,
+      `<@${excuse.author.id}>: ${excuse.content}`
+    )
+    return msg.editReply({embeds: [message]})
+  },
 
-  const paginationResponse = await msg.editReply({embeds: [paginationRespMessage], components: [paginationButtons]})
-  // We don't want to register handler anymore if it is already done
-  if (isPaginationCall) return
-  handlePagination(paginationResponse, msg)
+  getExcuseByUser: async (msg, authorId, isPaginationCall = false) => {
+    const responseData = await fetchExcuses(
+      `${msg.guild.id}?user=${authorId}`,
+      msg
+    )
+
+    if (
+      responseData == null ||
+      responseData.excuses == null ||
+      responseData.excuses.length <= 0
+    ) {
+      msg.editReply({
+        content: `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseAddInfo}\``,
+      })
+      return
+    }
+
+    paginationRespMessage = formatExcuses(responseData.excuses)
+
+    // Don't format the footer and add buttons if there is no other pages or if there is no pagination metadata
+    if (
+      responseData.meta == null ||
+      responseData.meta.total_pages === 1 ||
+      responseData.meta.total_pages === 0
+    ) {
+      await msg.editReply({embeds: [paginationRespMessage], components: []})
+      return
+    }
+
+    paginationRespMessage = formatFooter(
+      paginationRespMessage,
+      responseData.meta
+    )
+    const paginationButtons = new MessageActionRow()
+      .addComponents(
+        new MessageButton()
+          .setCustomId('page_prev')
+          .setLabel('<')
+          .setStyle('PRIMARY')
+      )
+      .addComponents(
+        new MessageButton()
+          .setCustomId('page_next')
+          .setLabel('>')
+          .setStyle('PRIMARY')
+      )
+    paginationPageMeta = responseData.meta
+
+    const paginationResponse = await msg.editReply({
+      embeds: [paginationRespMessage],
+      components: [paginationButtons],
+    })
+    // We don't want to register handler anymore if it is already done
+    if (isPaginationCall) return
+    module.exports.handlePagination(paginationResponse, msg)
+  },
+
+  handlePagination: (excuseMessage, msg) => {
+    if (!excuseMessage) return
+    ;(async () => {
+      // Only author of the command can use pagination
+      const filter = (i) =>
+        (i.customId === 'page_prev' || i.customId === 'page_next') &&
+        i.user.id === msg.user.id
+      const collector = await excuseMessage.createMessageComponentCollector({
+        filter,
+        time: buttonTimeout,
+      })
+
+      collector.on('collect', async (i) => {
+        await i.deferUpdate()
+        let pageNum = paginationPageMeta.current_page
+        switch (i.customId) {
+          case 'page_prev':
+            pageNum = pageNum > 1 ? --pageNum : paginationPageMeta.total_pages
+            break
+          case 'page_next':
+            pageNum = pageNum >= paginationPageMeta.total_pages ? 1 : ++pageNum
+            break
+          default:
+            break
+        }
+        console.debug('pagination system, pageNum: ', pageNum)
+        // Currently only `getExcuseCmd` has pagination system implemented, so
+        // no need to choose the correct function.
+        // This will be done by using:
+        // msg.options.getSubcommand()
+        await module.exports.getExcuseCmd(i, pageNum, true)
+
+        // Reset buttonTimeout and restart to wait again
+        collector.resetTimer()
+      })
+
+      // Remove button from message after the timeout
+      collector.on('end', (_, reason) => {
+        if (reason !== 'messageDelete') {
+          excuseMessage.edit({
+            embeds: [paginationRespMessage],
+            components: [],
+          })
+        }
+      })
+    })()
+  },
 }
 
 //
@@ -184,62 +289,17 @@ function logError(contextName, error, client, msg) {
   botChan.send({embeds: [embedMessage]})
 }
 
-function handlePagination(excuseMessage, msg) {
-  if (!excuseMessage) return
-
-  ;(async () => {
-    // Only author of the command can use pagination
-    const filter = (i) => (i.customId === 'page_prev' || i.customId === 'page_next') && i.user.id === msg.user.id
-    const collector = await excuseMessage.createMessageComponentCollector({
-      filter,
-      time: buttonTimeout,
-    })
-
-    collector.on('collect', async (i) => {
-      await i.deferUpdate()
-      let pageNum = paginationPageMeta.current_page
-      switch (i.customId) {
-        case 'page_prev':
-          pageNum = pageNum > 1 ? --pageNum : paginationPageMeta.total_pages
-          break
-        case 'page_next':
-          pageNum = pageNum >= paginationPageMeta.total_pages ? 1 : ++pageNum
-          break
-        default:
-          break
-      }
-      console.debug('pagination system, pageNum: ', pageNum)
-      // Currently only `getExcuseCmd` has pagination system implemented, so
-      // no need to choose the correct function.
-      // This will be done by using:
-      // msg.options.getSubcommand()
-      await getExcuseCmd(i, pageNum, true)
-
-      // Reset buttonTimeout and restart to wait again
-      collector.resetTimer()
-    })
-
-    // Remove button from message after the timeout
-    collector.on('end', (_, reason) => {
-      if (reason !== 'messageDelete') {
-        excuseMessage.edit({
-          embeds: [paginationRespMessage],
-          components: [],
-        })
-      }
-    })
-  })()
-}
-
 async function postExcuse(requestParam, formBody, msg) {
   try {
-    await axios({
+    console.debug('postExcuses, parameters:', requestParam)
+
+    const response = await axios({
       method: 'post',
       url: `${baseUrl}/${requestParam}`,
       data: formBody,
       headers,
     })
-    return true;
+    return response.status == 200;
   } catch (error) {
     logError('Codexcuse', `Error during POST ${baseUrl}/${requestParam}: ${error} `, msg.client, msg)
     msg.editReply({

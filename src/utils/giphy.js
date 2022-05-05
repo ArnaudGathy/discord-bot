@@ -1,5 +1,5 @@
-import auth from '../constants/auth.json'
-import axios from 'axios'
+const auth = require('../constants/auth.json')
+const axios = require('axios')
 
 const HOST = 'api.giphy.com/v1/gifs'
 const KEY = `api_key=${auth.token.giphy}`

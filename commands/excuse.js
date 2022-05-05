@@ -1,6 +1,6 @@
 const {SlashCommandBuilder} = require('@discordjs/builders')
 const {CommandInteraction} = require('discord.js')
-import {getExcuseCmd, getExcuseByUser, addExcuse, getRandomExcuse} from '../src/commands/excuse'
+const {getExcuseCmd, getExcuseByUser, addExcuse, getRandomExcuse} = require('../src/commands/excuse')
 
 // Following const are the name of option displayed to users
 const commandName = 'excuse'

@@ -1,8 +1,8 @@
 require('dotenv').config()
 const { Client, Intents, Collection } = require('discord.js');
-import {messageHandler} from './events/message'
-import auth from './constants/auth'
-import {channels} from './constants/channels'
+const {messageHandler} = require('./events/message')
+const auth = require('./constants/auth')
+const {channels} = require('./constants/channels')
 const fs = require('node:fs')
 
 export const client = new Client({intents : [
