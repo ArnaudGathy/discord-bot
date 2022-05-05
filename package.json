@@ -5,7 +5,6 @@
   "author": "Arnaud Gathy",
   "license": "MIT",
   "homepage": "https://github.com/ArnaudGathy/discord-bot",
-  "type": "module",
   "scripts": {
     "dev": "nodemon src/index.js --exec babel-node src/index.js",
     "prebuild": "rm -r build || true",
