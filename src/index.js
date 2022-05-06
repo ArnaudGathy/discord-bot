@@ -30,13 +30,13 @@ export const client = new Client({intents : [
 client.login(auth.token.discord)
 
 client.on('ready', () => {
+  console.log('Connected')
+  console.log(`Logged in as ${client.user.tag}`)
+
   if (process.env.NODE_ENV === 'production') {
-    client.channels
-      .cache.get(channels['test_bot'])
+    client.channels.cache
+      .get(channels['test_bot'])
       .send(`Running in ${process.env.NODE_ENV} 👌🔥`)
-  } else {
-    console.log('Connected')
-    console.log(`Logged in as ${client.user.tag}`)
   }
 })
 
