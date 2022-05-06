@@ -32,7 +32,7 @@ module.exports = {
     .addSubcommand((subcommand) =>
       subcommand
         .setName(subcommandUserOptionName)
-        .setDescription("Affiche les excuses de l'utilisateur")
+        .setDescription("Affiche les excuses d'un utilisateur cible")
         .addUserOption((option) =>
           option
             .setName(targetOptionName)

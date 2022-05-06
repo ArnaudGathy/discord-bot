@@ -41,7 +41,7 @@ module.exports = {
       responseData.excuses.length <= 0
     ) {
       msg.editReply({
-        content: `Il n'y a pas encore d'excuse. Utilise la commande: ${excuseAddInfo}`,
+        content: `Il n'y a pas encore d'excuse. Pour en ajouter: ${excuseAddInfo}`,
       })
       return
     }
@@ -87,10 +87,6 @@ module.exports = {
   },
 
   addExcuse: async (msg, excuseContent, author) => {
-    // As mentions in message is formatted like <@!user_id>
-    // We remove the mention from message content.
-    // excuseContent = excuseContent.replace(/<@!?(\d+)>/g, '')
-    // const author = msg.mentions.users.first()
     const formBody = {
       title: 'Excuse', // Mandatory field for the API, but useless in our cases.
       content: excuseContent,
@@ -115,7 +111,7 @@ module.exports = {
 
     if (responseData == null) {
       msg.editReply({
-        content: `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseAddInfo}\``,
+        content: `Il n'y a pas encore d'excuse. Pour en ajouter: \`${excuseAddInfo}\``,
       })
       return
     }
@@ -123,7 +119,7 @@ module.exports = {
     const excuse = responseData
     const message = new Discord.MessageEmbed()
       .setColor('#0099ff')
-      .setTitle('Random excuse')
+      .setTitle('Excuse random')
 
     message.addField(
       `Excuse ID: ${responseData.id}`,
@@ -144,7 +140,7 @@ module.exports = {
       responseData.excuses.length <= 0
     ) {
       msg.editReply({
-        content: `Il n'y a pas encore d'excuse. Utilise la commande: \`${excuseAddInfo}\``,
+        content: `Il n'y a pas encore d'excuse pour l'utilisateur <@${authorId}>. Pour en ajouter: \`${excuseAddInfo}\``,
       })
       return
     }
