@@ -27,7 +27,7 @@ let paginationPageMeta
 let paginationRespMessage
 
 module.exports = {
-  getExcuseCmd: async (msg, pageNum = null, isPaginationCall = false) => {
+  getExcuseCmd: async (msg, printReporter = false, pageNum = null, isPaginationCall = false) => {
     let requestParam = msg.guild.id
 
     if (pageNum != null) {
@@ -46,7 +46,7 @@ module.exports = {
       return
     }
 
-    paginationRespMessage = formatExcuses(responseData.excuses)
+    paginationRespMessage = formatExcuses(responseData.excuses, printReporter)
 
     // Don't format the footer and add buttons if there is no other pages or if there is no pagination metadata
     if (
@@ -60,20 +60,20 @@ module.exports = {
 
     paginationRespMessage = formatFooter(
       paginationRespMessage,
-      responseData.meta
+      responseData.meta,
     )
     let paginationButtons = new MessageActionRow()
       .addComponents(
         new MessageButton()
           .setCustomId('page_prev')
           .setLabel('<')
-          .setStyle('PRIMARY')
+          .setStyle('PRIMARY'),
       )
       .addComponents(
         new MessageButton()
           .setCustomId('page_next')
           .setLabel('>')
-          .setStyle('PRIMARY')
+          .setStyle('PRIMARY'),
       )
     paginationPageMeta = responseData.meta
 
@@ -83,7 +83,7 @@ module.exports = {
     })
     // We don't want to register handler anymore if it is already done
     if (isPaginationCall) return
-    module.exports.handlePagination(paginationResponse, msg)
+    module.exports.handlePagination(paginationResponse, msg, printReporter)
   },
 
   addExcuse: async (msg, excuseContent, author) => {
@@ -106,7 +106,7 @@ module.exports = {
     return msg.editReply({content: 'Excuse ajoutée :+1:'})
   },
 
-  getRandomExcuse: async (msg) => {
+  getRandomExcuse: async (msg, printReporter = false) => {
     const responseData = await fetchExcuses(`${msg.guild.id}?random=1`, msg)
 
     if (responseData == null) {
@@ -125,10 +125,13 @@ module.exports = {
       `Excuse ID: ${responseData.id}`,
       `<@${excuse.author.id}>: ${excuse.content}`
     )
+    if (printReporter) {
+      message.addField('Rapporteur:', `<@${excuse.reporter.id}>`, true)
+    }
     return msg.editReply({embeds: [message]})
   },
 
-  getExcuseByUser: async (msg, authorId, isPaginationCall = false) => {
+  getExcuseByUser: async (msg, authorId, printReporter = false, isPaginationCall = false) => {
     const responseData = await fetchExcuses(
       `${msg.guild.id}?user=${authorId}`,
       msg
@@ -145,7 +148,7 @@ module.exports = {
       return
     }
 
-    paginationRespMessage = formatExcuses(responseData.excuses)
+    paginationRespMessage = formatExcuses(responseData.excuses, printReporter)
 
     // Don't format the footer and add buttons if there is no other pages or if there is no pagination metadata
     if (
@@ -182,10 +185,10 @@ module.exports = {
     })
     // We don't want to register handler anymore if it is already done
     if (isPaginationCall) return
-    module.exports.handlePagination(paginationResponse, msg)
+    module.exports.handlePagination(paginationResponse, msg, printReporter)
   },
 
-  handlePagination: (excuseMessage, msg) => {
+  handlePagination: (excuseMessage, msg, printReporter) => {
     if (!excuseMessage) return
     ;(async () => {
       // Only author of the command can use pagination
@@ -215,7 +218,7 @@ module.exports = {
         // no need to choose the correct function.
         // This will be done by using:
         // msg.options.getSubcommand()
-        await module.exports.getExcuseCmd(i, pageNum, true)
+        await module.exports.getExcuseCmd(i, printReporter, pageNum, true)
 
         // Reset buttonTimeout and restart to wait again
         collector.resetTimer()
@@ -238,17 +241,28 @@ module.exports = {
 // Tools
 //
 
-function formatExcuses(body) {
+function formatExcuses(body, printReporter) {
   const message = new Discord.MessageEmbed()
     .setColor('#0099ff')
     .setTitle("Liste de #codexcuse")
 
   body.map((excuse, idx) => {
     if (excuse.author != null && excuse.content != null) {
-      message.addField(
-        `Excuse #${idx + 1}`,
-        `<@${excuse.author.id}>: ${excuse.content}`
-      )
+      if (printReporter) {
+        message.addField(
+          `Excuse #${idx + 1}`,
+          `<@${excuse.author.id}>: ${excuse.content}`,
+          true
+        )
+        message.addField('Rapporteur:', `<@${excuse.reporter.id}>`, true)
+        // Add newline
+        message.addField('\u200B', '\u200B', true)
+      } else {
+        message.addField(
+          `Excuse #${idx + 1}`,
+          `<@${excuse.author.id}>: ${excuse.content}`
+        )
+      }
     }
   })
   return message

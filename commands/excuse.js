@@ -4,6 +4,7 @@ const {getExcuseCmd, getExcuseByUser, addExcuse, getRandomExcuse} = require('../
 
 // Following const are the name of option displayed to users
 const commandName = 'excuse'
+const subcommandReporterName = 'rapporteur'
 const subcommandAllOptionName = 'all'
 const subcommandUserOptionName = 'user'
 const subcommandAddOptionName = 'add'
@@ -28,6 +29,7 @@ module.exports = {
             .setName(subcommandPageNumberOptionName)
             .setDescription('Le n° de la page')
         )
+        .addBooleanOption(option => option.setName(subcommandReporterName).setDescription('Affiche le rapporteur de l\'excuse'))
     )
     .addSubcommand((subcommand) =>
       subcommand
@@ -39,6 +41,7 @@ module.exports = {
             .setDescription("L'utilisateur en question")
             .setRequired(true)
         )
+        .addBooleanOption(option => option.setName(subcommandReporterName).setDescription('Affiche le rapporteur de l\'excuse'))
     )
     .addSubcommand((subcommand) =>
       subcommand
@@ -63,6 +66,7 @@ module.exports = {
       subcommand
         .setName(subcommandRandomOptionName)
         .setDescription('Affiche une excuse random')
+        .addBooleanOption(option => option.setName(subcommandReporterName).setDescription('Affiche le rapporteur de l\'excuse'))
     ),
 
   /**
@@ -73,17 +77,19 @@ module.exports = {
     await interaction.deferReply()
     const { options } = interaction
 
+    const printReporter = options.getBoolean(subcommandReporterName)
+
     let target;
     const subcommand = options.getSubcommand()
     switch (subcommand) {
       case subcommandAllOptionName:
         let pageNum = interaction.options.getNumber(subcommandPageNumberOptionName)
-        getExcuseCmd(interaction, pageNum)
+        getExcuseCmd(interaction, printReporter, pageNum)
         break;
 
       case subcommandUserOptionName:
         target = interaction.options.getUser(targetOptionName)
-        getExcuseByUser(interaction, target.id)
+        getExcuseByUser(interaction, target.id, printReporter)
         break;
 
       case subcommandAddOptionName:
@@ -93,12 +99,12 @@ module.exports = {
         break;
 
       case subcommandRandomOptionName:
-        getRandomExcuse(interaction)
+        getRandomExcuse(interaction, printReporter)
         break;
 
       // case of get all excuses
       default:
-        getExcuseCmd(interaction)
+        getExcuseCmd(interaction, printReporter)
         break;
     }
   },
